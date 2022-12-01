@@ -7,5 +7,5 @@ pub fn read_file(day: usize) -> String {
         "inputs"
     };
     println!("{dir}");
-    fs::read_to_string(format!("{dir}/{day:0>2}.txt")).unwrap()
+    unsafe { fs::read_to_string(format!("{dir}/{day:0>2}.txt")).unwrap_unchecked() }
 }
