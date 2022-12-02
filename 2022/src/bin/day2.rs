@@ -11,17 +11,24 @@ pub fn get_data(data: &str) -> &[u8] {
 pub fn part_one(input: &[u8]) -> usize {
     input
         .array_chunks::<4>()
-        .map(|round| match [round[0], round[2]] {
-            [b'A', b'X'] => 4,
-            [b'A', b'Y'] => 8,
-            [b'A', b'Z'] => 3,
-            [b'B', b'X'] => 1,
-            [b'B', b'Y'] => 5,
-            [b'B', b'Z'] => 9,
-            [b'C', b'X'] => 7,
-            [b'C', b'Y'] => 2,
-            [b'C', b'Z'] => 6,
-            _ => unreachable!(),
+        .map(|round| {
+            let other = (round[0] - b'A') + 1;
+            let own = round[2] - b'W';
+            usize::from(if other == own {
+                3 + own
+            } else if other < own {
+                if own == 3 && other == 1 {
+                    own
+                } else {
+                    own + 6
+                }
+            } else {
+                if own == 1 && other == 3 {
+                    7
+                } else {
+                    own
+                }
+            })
         })
         .sum()
 }
