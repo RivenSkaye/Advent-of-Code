@@ -42,13 +42,13 @@ mod aoc_benching {
     fn part1bench(b: &mut test::Bencher) {
         let read = common::read_file(1);
         let input = get_data(&read);
-        b.iter(|| part_one(test::black_box(&input)))
+        b.iter(|| assert_eq!(part_one(test::black_box(&input)), 69206))
     }
 
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
         let read = common::read_file(1);
         let input = get_data(&read);
-        b.iter(|| part_two(test::black_box(input.clone())))
+        b.iter(|| assert_eq!(part_two(test::black_box(input.clone())), 197400))
     }
 }
