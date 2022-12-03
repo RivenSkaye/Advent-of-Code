@@ -10,8 +10,9 @@ def part_one(aoc_data):
 
     txt = aoc_data.splitlines()
     for line in txt:
-        first = frozenset(line[:len(line) // 2])
-        second = frozenset(line[len(line) // 2:])
+        l = len(line) // 2
+        first = frozenset(line[:l])
+        second = frozenset(line[l:])
         for char in first:
             if char in second:
                 dupval += ord(char) - (offset_lower if char.islower()
