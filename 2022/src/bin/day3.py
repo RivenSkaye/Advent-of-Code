@@ -12,12 +12,10 @@ def part_one(aoc_data):
     for line in txt:
         first = frozenset(line[:len(line) // 2])
         second = frozenset(line[len(line) // 2:])
-        processed = []
         for char in first:
             if char in second and char not in processed:
                 dupval += ord(char) - (offset_lower if char.islower()
                                        else offset_upper)
-                processed.append(char)
 
     print(dupval)
 
