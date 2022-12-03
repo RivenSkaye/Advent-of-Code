@@ -13,7 +13,7 @@ def part_one(aoc_data):
         first = frozenset(line[:len(line) // 2])
         second = frozenset(line[len(line) // 2:])
         for char in first:
-            if char in second and char not in processed:
+            if char in second:
                 dupval += ord(char) - (offset_lower if char.islower()
                                        else offset_upper)
 
