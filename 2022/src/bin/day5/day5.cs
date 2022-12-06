@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -109,9 +110,8 @@ Stack<(int, int, int)>? moves = null;
     return (new(parsedmoves), outstacks);
 }
 
-void PartOne()
+string PartOne()
 {
-    Console.WriteLine("Part one:");
     foreach ((int, int, int) move in moves)
     {
         int amnt = move.Item1;
@@ -119,20 +119,17 @@ void PartOne()
         int to = move.Item3 - 1;
         while (amnt > 0)
         {
-            stacks[to].Push(stacks[from].Pop());
+            stacks![to].Push(stacks[from].Pop());
             amnt--;
         }
     }
     StringBuilder order = new();
     foreach (Stack<char> st in stacks!) order.Append(st.Pop());
-    Console.WriteLine(order.ToString());
+    return order.ToString();
 }
-(moves, stacks) = Parse(read);
-PartOne();
 
-void PartTwo()
+string PartTwo()
 {
-    Console.WriteLine("Part two:");
     Stack<char> inter = new();
     foreach ((int, int, int) move in moves)
     {
@@ -141,14 +138,66 @@ void PartTwo()
         int to = move.Item3 - 1;
         while (amnt > 0)
         {
-            inter.Push(stacks[from].Pop());
+            inter.Push(stacks![from].Pop());
             amnt--;
         }
-        while (inter.Count > 0) stacks[to].Push(inter.Pop());
+        while (inter.Count > 0) stacks![to].Push(inter.Pop());
     }
     StringBuilder order = new();
     foreach (Stack<char> st in stacks!) order.Append(st.Pop());
-    Console.WriteLine(order.ToString());
+    return order.ToString();
 }
+
+void Bench(int runcount = 100)
+{
+    Stopwatch timer = new();
+    List<double> runs = new();
+    for (int i = 0; i < runcount; i++)
+    {
+        (moves, stacks) = Parse(read);
+        timer.Start();
+        PartOne();
+        timer.Stop();
+        runs.Add(timer.Elapsed.TotalMilliseconds);
+        timer.Reset();
+    }
+    double total = 0;
+    double shortest = double.MaxValue;
+    double longest = double.MinValue;
+    foreach (double r in runs)
+    {
+        total += r;
+        shortest = shortest < r ? shortest : r;
+        longest = longest > r ? longest : r;
+    }
+    var avg = total / runs.Count;
+    Console.WriteLine($"Part Two\r\nShortest: {shortest}\r\nLongest: {longest}\r\nAvg: {avg}\nFirst: {runs[0]}");
+    Console.WriteLine("----------");
+    runs.Clear();
+    for (int i = 0; i < runcount; i++)
+    {
+        (moves, stacks) = Parse(read);
+        timer.Start();
+        PartTwo();
+        timer.Stop();
+        runs.Add(timer.Elapsed.TotalMilliseconds);
+        timer.Reset();
+    }
+    total = 0;
+    shortest = double.MaxValue;
+    longest = double.MinValue;
+    foreach (double r in runs)
+    {
+        total += r;
+        shortest = shortest < r ? shortest : r;
+        longest = longest > r ? longest : r;
+    }
+    avg = total / runs.Count;
+    Console.WriteLine($"Part Two\r\nShortest: {shortest}\r\nLongest: {longest}\r\nAvg: {avg}\nFirst: {runs[0]}");
+    Console.WriteLine("----------");
+}
+Bench(1000);
 (moves, stacks) = Parse(read);
-PartTwo();
+Console.WriteLine(PartOne());
+(moves, stacks) = Parse(read);
+Console.WriteLine(PartTwo());
