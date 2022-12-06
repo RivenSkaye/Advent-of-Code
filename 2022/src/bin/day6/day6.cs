@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 // Define the input file; test for debug, real deal for release
 #if DEBUG
@@ -15,8 +14,6 @@ string infile = "../../../inputs/06.txt";
 using StreamReader r = File.OpenText(infile);
 char[] read = new char[r.BaseStream.Length];
 r.Read(read, 0, (int)r.BaseStream.Length);
-List<bool> waste = new();
-foreach (char rd in read) waste.Add(rd == '\n');
 Queue<char> selection = new(14);
 
 bool CheckNext(int current, int count)
