@@ -20,19 +20,19 @@ $parsetime = microtime(true) - $start;
 
 function row_vis(int $idx, array $row): int
 {
-    $rev = array_reverse($row);
     $len = count($row);
-    $revidx = ($len - $idx) - 1;
+    $startright = $idx + 1;
     $over = $row[$idx] - 1;
     $from_left = $from_right = false;
-    for ($i = 0; $i < $len; $i++) {
-        // Stop checking either if it's true
-        $from_left = $from_left || ($i < $idx && $row[$i] > $over);
-        $from_right = $from_right || ($i < $revidx && $rev[$i] > $over);
-        // Early exit from the loop once we know for sure
-        if ($from_left && $from_right) return 1;
+    for ($i = 0; $i < $idx; $i++) {
+        $from_left = $row[$i] > $over;
+        if ($from_left) break;
     }
-    return 0;
+    for ($i = $startright; $i < $len; $i++) {
+        $from_right = $row[$i] > $over;
+        if ($from_right) break;
+    }
+    return ($from_left && $from_right) << 0;
 }
 
 $total = 0;
@@ -40,23 +40,19 @@ $visible = 0;
 for ($y = 0; $y <= $cols; $y++) {
     $col = [];
     $hidden = [];
+    $y_inbounds = $y > 0 && $y < $cols;
     for ($x = 0; $x <= $rows; $x++) {
         $total += 1;
         $cur = $input[$x][$y];
         array_push($col, $cur);
-        // Push whether or not it's hidden on this row and column.
-        // If either is 0, it's not hidden by default.
-        if ($y > 0 && $y < $cols && $x > 0 && $x < $rows) {
+        if ($x === $rows) {
+            foreach ($hidden as $idx => &$h) {
+                if ($h === 1) $h = row_vis($idx, $col);
+            }
+        } elseif ($y_inbounds && $x > 0 && $x < $rows) {
             array_push($hidden, row_vis($y, $input[$x]));
         } else {
             array_push($hidden, 0);
-        }
-    }
-    if ($y > 0 && $y < $cols) {
-        // For everything in this column not on an edge, check visibility
-        for ($x = 1; $x < $rows; $x++) {
-            $chk = &$hidden[$x];
-            if ($chk === 1) $chk = row_vis($x, $col);
         }
     }
     $visible += array_sum($hidden);
