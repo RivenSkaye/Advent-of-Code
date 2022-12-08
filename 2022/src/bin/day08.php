@@ -35,31 +35,6 @@ function row_vis(int $idx, array $row): int
     return ($from_left && $from_right) << 0;
 }
 
-$total = 0;
-$visible = 0;
-for ($y = 0; $y <= $cols; $y++) {
-    $col = [];
-    $hidden = [];
-    $y_inbounds = $y > 0 && $y < $cols;
-    for ($x = 0; $x <= $rows; $x++) {
-        $total += 1;
-        $cur = $input[$x][$y];
-        array_push($col, $cur);
-        if ($x === $rows) {
-            foreach ($hidden as $idx => &$h) {
-                if ($h === 1) $h = row_vis($idx, $col);
-            }
-        } elseif ($y_inbounds && $x > 0 && $x < $rows) {
-            array_push($hidden, row_vis($y, $input[$x]));
-        } else {
-            array_push($hidden, 0);
-        }
-    }
-    $visible += array_sum($hidden);
-}
-$p1time = (microtime(true) - $start) - $parsetime;
-print("Part one result: " . $total - $visible . PHP_EOL);
-
 function row_score(int $idx, array $row): int
 {
     $len = count($row) - 1;
@@ -79,32 +54,40 @@ function row_score(int $idx, array $row): int
     return $to_left * $to_right;
 }
 
+$total = 0;
+$visible = 0;
 $maxscore = 0;
 for ($y = 0; $y <= $cols; $y++) {
     $col = [];
-    $score = [];
+    $hidden = [];
+    $scores = [];
+    $y_inbounds = $y > 0 && $y < $cols;
     for ($x = 0; $x <= $rows; $x++) {
+        $total += 1;
         $cur = $input[$x][$y];
         array_push($col, $cur);
         if ($x === $rows) {
-            foreach ($score as $idx => &$s) {
-                $s *= row_score($idx, $col);
+            foreach ($scores as $idx => &$s) {
+                if ($s > 0) $s *= row_score($idx, $col);
+                if ($hidden[$idx] === 1) $hidden[$idx] = row_vis($idx, $col);
             }
-            $maxscore = max($maxscore, max($score));
-        } elseif ($x === $rows || $y === 0 || $y === $cols || $x === 0) {
-            // Edges have one side without trees, so it always scores 0
-            array_push($score, 0);
+            $maxscore = max($maxscore, max($scores));
+            $visible += array_sum($hidden);
+        } elseif ($y_inbounds && $x > 0 && $x < $rows) {
+            array_push($scores, row_score($y, $input[$x]));
+            array_push($hidden, row_vis($y, $input[$x]));
         } else {
-            array_push($score, row_score($y, $input[$x]));
+            array_push($scores, 0);
+            array_push($hidden, 0);
         }
     }
 }
 $totaltime = microtime(true) - $start;
-$p2time = ($totaltime - $parsetime) - $p1time;
-$p1time = 1000 * $p1time;
-$p2time = 1000 * $p2time;
+$processtime = $totaltime - $parsetime;
+print("Part one result: " . $total - $visible . PHP_EOL);
+print("Part two result: " . $maxscore . PHP_EOL);
 $parsetime = 1000 * $parsetime;
 $totaltime = 1000 * $totaltime;
-print("Part two result: " . $maxscore . PHP_EOL);
+$processtime = 1000 * $processtime;
 
-print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tP1: $p1time ms\tP2: $p2time ms.");
+print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tProcessing: $processtime");
