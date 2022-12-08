@@ -21,6 +21,7 @@ $parsetime = microtime(true) - $start;
 function row_vis(int $idx, array $row): array
 {
     $len = count($row);
+    $maxidx = $len - 1;
     $over = $row[$idx] - 1;
     $from_left = $from_right = false;
     $to_left = $to_right = 1;
@@ -32,9 +33,9 @@ function row_vis(int $idx, array $row): array
     for ($i = $idx + 1; $i < $len; $i++) {
         $from_right = $row[$i] > $over;
         if ($from_right) break;
-        $to_right += 1 - ($i === $len - 1);
+        $to_right += 1 - ($i === $maxidx);
     }
-    return [$to_left * $to_right, ($from_left && $from_right) << 0];
+    return [$to_left * $to_right, ($from_left && $from_right)];
 }
 
 $total = 0;
@@ -75,4 +76,4 @@ $parsetime = 1000 * $parsetime;
 $totaltime = 1000 * $totaltime;
 $processtime = 1000 * $processtime;
 
-print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tProcessing: $processtime");
+print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tProcessing: $processtime ms");
