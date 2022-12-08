@@ -18,23 +18,6 @@ $rows = count($input) - 1;
 
 $parsetime = microtime(true) - $start;
 
-function old_row_vis(int $idx, array $row): int
-{
-    $len = count($row);
-    $startright = $idx + 1;
-    $over = $row[$idx] - 1;
-    $from_left = $from_right = false;
-    for ($i = 0; $i < $idx; $i++) {
-        $from_left = $row[$i] > $over;
-        if ($from_left) break;
-    }
-    for ($i = $startright; $i < $len; $i++) {
-        $from_right = $row[$i] > $over;
-        if ($from_right) break;
-    }
-    return ($from_left && $from_right) << 0;
-}
-
 function row_vis(int $idx, array $row): array
 {
     $len = count($row);
