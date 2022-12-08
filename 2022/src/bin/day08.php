@@ -72,8 +72,8 @@ $totaltime = hrtime(true) - $start;
 $processtime = $totaltime - $parsetime;
 print("Part one result: " . $total - $visible . PHP_EOL);
 print("Part two result: " . $maxscore . PHP_EOL);
-$parsetime = $parsetime;
-$totaltime = $totaltime;
-$processtime = $processtime;
+$parsetime = $parsetime / 1000000;
+$totaltime = $totaltime / 1000000;
+$processtime = $processtime / 1000000;
 
-print("Total runtime: $totaltime ns\n\tParsing: $parsetime ns\n\tProcessing: $processtime ns");
+print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tProcessing: $processtime ms");
