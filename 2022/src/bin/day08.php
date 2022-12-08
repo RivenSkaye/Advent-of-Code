@@ -21,10 +21,10 @@ $parsetime = microtime(true) - $start;
 function row_vis(int $idx, array $row): int
 {
     $rev = array_reverse($row);
-    $len = count($row) - 1;
-    $revidx = $len - $idx;
+    $len = count($row);
+    $revidx = ($len - $idx) - 1;
     $from_left = $from_right = false;
-    for ($i = 0; $i <= $len; $i++) {
+    for ($i = 0; $i < $len; $i++) {
         // Stop checking either if it's true
         $from_left = $from_left || ($i < $idx && $row[$i] >= $row[$idx]);
         $from_right = $from_right || ($i < $revidx && $rev[$i] >= $row[$idx]);
@@ -35,7 +35,7 @@ function row_vis(int $idx, array $row): int
 }
 
 $total = 0;
-$visible = [];
+$visible = 0;
 for ($y = 0; $y <= $cols; $y++) {
     $col = [];
     $hidden = [];
@@ -53,33 +53,33 @@ for ($y = 0; $y <= $cols; $y++) {
     }
     // For everything in this column not on an edge, check visibility
     for ($x = 1; $x < $rows; $x++) {
-        if ($hidden[$x] == 1) $hidden[$x] = row_vis($x, $col);
+        if ($hidden[$x] === 1) $hidden[$x] = row_vis($x, $col);
     }
-    array_push($visible, array_sum($hidden));
+    $visible += array_sum($hidden);
 }
-print("Part one result: " . $total - array_sum($visible) . PHP_EOL);
 $p1time = (microtime(true) - $start) - $parsetime;
+print("Part one result: " . $total - $visible . PHP_EOL);
 
 function row_score(int $idx, array $row): int
 {
     $len = count($row) - 1;
     // There's always one tree visible unless we're at an edge
     $to_left = $to_right = 1;
-    for ($x = $idx - 1; $x >= 0; $x--) {
+    for ($x = $idx - 1; $x > -1; $x--) {
         // Stop counting if we hit a tree as tall or taller than this
-        if ($row[$x] >= $row[$idx] || $x == 0) break;
+        if ($row[$x] >= $row[$idx] || $x === 0) break;
         // Otherwise we can see one more
         $to_left += 1;
     }
     // Same in the other direction
     for ($x = $idx + 1; $x <= $len; $x++) {
-        if ($row[$x] >= $row[$idx] || $x == $len) break;
+        if ($row[$x] >= $row[$idx] || $x === $len) break;
         $to_right += 1;
     }
     return $to_left * $to_right;
 }
 
-$scores = [];
+$maxscore = 0;
 for ($y = 0; $y <= $cols; $y++) {
     $col = [];
     $score = [];
@@ -97,14 +97,14 @@ for ($y = 0; $y <= $cols; $y++) {
     for ($x = 1; $x < $rows; $x++) {
         $score[$x] *= row_score($x, $col);
     }
-    array_push($scores, max($score));
+    $maxscore = max($maxscore, max($score));
 }
-print("Part two result: " . max($scores) . PHP_EOL);
 $totaltime = microtime(true) - $start;
 $p2time = ($totaltime - $parsetime) - $p1time;
 $p1time = 1000 * $p1time;
 $p2time = 1000 * $p2time;
 $parsetime = 1000 * $parsetime;
 $totaltime = 1000 * $totaltime;
+print("Part two result: " . $maxscore . PHP_EOL);
 
 print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tP1: $p1time ms\tP2: $p2time ms.");
