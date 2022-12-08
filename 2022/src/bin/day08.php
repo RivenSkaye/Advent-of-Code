@@ -2,14 +2,21 @@
 
 namespace Riven\AoC\Day8;
 
+$intext = file_get_contents("../../inputs/08.txt", false, null);
+
+// Get the runtime per part
+$start = microtime(true);
+
 $input = [];
-foreach (explode("\n", file_get_contents("../../inputs/08.txt", false, null)) as $line) {
+foreach (explode("\n", $intext) as $line) {
     array_push($input, array_map('intval', str_split($line)));
 }
 // Remove empty line
 array_pop($input);
 $cols = count($input[0]) - 1;
 $rows = count($input) - 1;
+
+$parsetime = microtime(true) - $start;
 
 function row_vis(int $idx, array $row): int
 {
@@ -51,6 +58,7 @@ for ($y = 0; $y <= $cols; $y++) {
     array_push($visible, array_sum($hidden));
 }
 print("Part one result: " . $total - array_sum($visible) . PHP_EOL);
+$p1time = (microtime(true) - $start) - $parsetime;
 
 function row_score(int $idx, array $row): int
 {
@@ -91,4 +99,12 @@ for ($y = 0; $y <= $cols; $y++) {
     }
     array_push($scores, max($score));
 }
-print("Part two result: " . max($scores));
+print("Part two result: " . max($scores) . PHP_EOL);
+$totaltime = microtime(true) - $start;
+$p2time = ($totaltime - $parsetime) - $p1time;
+$p1time = 1000 * $p1time;
+$p2time = 1000 * $p2time;
+$parsetime = 1000 * $parsetime;
+$totaltime = 1000 * $totaltime;
+
+print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tP1: $p1time ms\tP2: $p2time ms.");
