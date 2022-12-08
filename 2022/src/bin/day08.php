@@ -5,7 +5,7 @@ namespace Riven\AoC\Day8;
 $intext = file_get_contents("../../inputs/08.txt", false, null);
 
 // Get the runtime per part
-$start = microtime(true);
+$start = hrtime(true);
 
 $input = [];
 foreach (explode("\n", $intext) as $line) {
@@ -16,7 +16,7 @@ array_pop($input);
 $cols = count($input[0]) - 1;
 $rows = count($input) - 1;
 
-$parsetime = microtime(true) - $start;
+$parsetime = hrtime(true) - $start;
 
 function row_vis(int $idx, array $row): array
 {
@@ -35,7 +35,7 @@ function row_vis(int $idx, array $row): array
         if ($from_right) break;
         $to_right += 1 - ($i === $maxidx);
     }
-    return [$to_left * $to_right, ($from_left && $from_right)];
+    return [$to_left * $to_right, ($from_left && $from_right) << 0];
 }
 
 $total = 0;
@@ -68,12 +68,12 @@ for ($y = 0; $y <= $cols; $y++) {
         }
     }
 }
-$totaltime = microtime(true) - $start;
+$totaltime = hrtime(true) - $start;
 $processtime = $totaltime - $parsetime;
 print("Part one result: " . $total - $visible . PHP_EOL);
 print("Part two result: " . $maxscore . PHP_EOL);
-$parsetime = 1000 * $parsetime;
-$totaltime = 1000 * $totaltime;
-$processtime = 1000 * $processtime;
+$parsetime = $parsetime;
+$totaltime = $totaltime;
+$processtime = $processtime;
 
-print("Total runtime: $totaltime ms\n\tParsing: $parsetime ms\n\tProcessing: $processtime ms");
+print("Total runtime: $totaltime ns\n\tParsing: $parsetime ns\n\tProcessing: $processtime ns");
