@@ -52,10 +52,12 @@ for ($y = 0; $y <= $cols; $y++) {
             array_push($hidden, 0);
         }
     }
-    // For everything in this column not on an edge, check visibility
-    for ($x = 1; $x < $rows; $x++) {
-        $chk = &$hidden[$x];
-        if ($chk === 1) $chk = row_vis($x, $col);
+    if ($y > 0 && $y < $cols) {
+        // For everything in this column not on an edge, check visibility
+        for ($x = 1; $x < $rows; $x++) {
+            $chk = &$hidden[$x];
+            if ($chk === 1) $chk = row_vis($x, $col);
+        }
     }
     $visible += array_sum($hidden);
 }
@@ -88,18 +90,18 @@ for ($y = 0; $y <= $cols; $y++) {
     for ($x = 0; $x <= $rows; $x++) {
         $cur = $input[$x][$y];
         array_push($col, $cur);
-        // Edges have one side without trees, so it always scores 0
-        if ($y === 0 || $y === $cols || $x === 0 || $x === $rows) {
+        if ($x === $rows) {
+            foreach ($score as $idx => &$s) {
+                $s *= row_score($idx, $col);
+            }
+            $maxscore = max($maxscore, max($score));
+        } elseif ($x === $rows || $y === 0 || $y === $cols || $x === 0) {
+            // Edges have one side without trees, so it always scores 0
             array_push($score, 0);
         } else {
             array_push($score, row_score($y, $input[$x]));
         }
     }
-    // For everything in this column, check score
-    for ($x = 1; $x < $rows; $x++) {
-        $score[$x] *= row_score($x, $col);
-    }
-    $maxscore = max($maxscore, max($score));
 }
 $totaltime = microtime(true) - $start;
 $p2time = ($totaltime - $parsetime) - $p1time;
