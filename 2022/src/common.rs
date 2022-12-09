@@ -1,11 +1,10 @@
-use std::fs;
+#[cfg(debug_assertions)]
+const FILENAME: &str = "test_inputs";
+#[cfg(not(debug_assertions))]
+const FILENAME: &str = "inputs";
 
-pub fn read_file(day: usize) -> String {
-    let dir = if cfg!(debug_assertions) {
-        "test_inputs"
-    } else {
-        "inputs"
-    };
-    println!("{dir}");
-    unsafe { fs::read_to_string(format!("{dir}/{day:0>2}.txt")).unwrap_unchecked() }
+#[inline(always)]
+pub fn read_file<const DAY: usize>() -> String {
+    println!("Reading `{FILENAME}`");
+    unsafe { std::fs::read_to_string(format!("{FILENAME}/{DAY:0>2}.txt")).unwrap_unchecked() }
 }
