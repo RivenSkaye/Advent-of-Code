@@ -22,7 +22,7 @@ pub fn part_two(mut data: Vec<usize>) -> usize {
 }
 
 pub fn main() {
-    let data = common::read_file(1);
+    let data = common::read_file::<1>();
     let parsed = get_data(&data);
     part_one(&parsed);
     println!("Part two: {}", part_two(parsed));
@@ -34,20 +34,20 @@ mod aoc_benching {
 
     #[bench]
     fn parsebench(b: &mut test::Bencher) {
-        let input = common::read_file(1);
+        let input = common::read_file::<1>();
         b.iter(|| get_data(test::black_box(&input)))
     }
 
     #[bench]
     fn part1bench(b: &mut test::Bencher) {
-        let read = common::read_file(1);
+        let read = common::read_file::<1>();
         let input = get_data(&read);
         b.iter(|| assert_eq!(part_one(test::black_box(&input)), 69206))
     }
 
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
-        let read = common::read_file(1);
+        let read = common::read_file::<1>();
         let input = get_data(&read);
         b.iter(|| assert_eq!(part_two(test::black_box(input.clone())), 197400))
     }

@@ -57,7 +57,7 @@ pub fn part_two(input: &[u8]) -> usize {
 }
 
 pub fn main() {
-    let input = common::read_file(2);
+    let input = common::read_file::<2>();
     println!("{}", part_one(get_data(&input)));
     println!("{}", part_two(get_data(&input)));
 }
@@ -68,20 +68,20 @@ mod aoc_benching {
 
     #[bench]
     fn parsebench(b: &mut test::Bencher) {
-        let input = common::read_file(2);
+        let input = common::read_file::<2>();
         b.iter(|| get_data(test::black_box(&input)))
     }
 
     #[bench]
     fn part1bench(b: &mut test::Bencher) {
-        let read = common::read_file(2);
+        let read = common::read_file::<2>();
         let input = get_data(&read);
         b.iter(|| assert_eq!(part_one(test::black_box(input)), 13565))
     }
 
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
-        let read = common::read_file(2);
+        let read = common::read_file::<2>();
         let input = get_data(&read);
         b.iter(|| assert_eq!(part_two(test::black_box(input)), 12424))
     }
