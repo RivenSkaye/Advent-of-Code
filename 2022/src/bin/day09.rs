@@ -1,4 +1,6 @@
 #![feature(generic_const_exprs)]
+#![feature(test)]
+
 use aoc2022::common::read_file;
 use std::collections::HashSet;
 
@@ -6,60 +8,92 @@ pub fn parse(input: &str) -> Vec<(u8, u16)> {
     input
         .lines()
         .map(|line| {
-            let parts = unsafe { line.split_once(" ").unwrap_unchecked() };
+            let parts = line.split_once(" ").unwrap();
             match parts {
-                ("L", x) => (b'L', x.parse::<u16>().unwrap()),
-                ("R", y) => (b'R', y.parse::<u16>().unwrap()),
-                ("D", y) => (b'D', y.parse::<u16>().unwrap()),
-                (_, x) => (b'U', x.parse::<u16>().unwrap()),
+                ("L", x) => (b'L', unsafe { x.parse::<u16>().unwrap_unchecked() }),
+                ("R", y) => (b'R', unsafe { y.parse::<u16>().unwrap_unchecked() }),
+                ("D", y) => (b'D', unsafe { y.parse::<u16>().unwrap_unchecked() }),
+                ("U", x) => (b'U', unsafe { x.parse::<u16>().unwrap_unchecked() }),
+                _ => unreachable!(),
             }
         })
         .collect()
 }
 
-fn walk<const TAILS: usize>(parsed: Vec<(u8, u16)>) -> i64 {
-    let mut tails = [(0_isize, 0_isize); TAILS];
+fn walk<const TAILS: usize>(parsed: &Vec<(u8, u16)>) -> i64
+where
+    // We only care about the tails, so why should anyone consuming this API
+    // ever worry about +1 for the head? I also think it looks nicer than doing
+    // CONSTVAL - 1 repeatedly.
+    [(); TAILS + 1]: Sized,
+{
+    let mut tails = [(0_isize, 0_isize); TAILS + 1];
     let mut coords = HashSet::new();
-    coords.insert((0, 0));
     parsed.iter().for_each(|(dir, len)| {
         (0..*len).into_iter().for_each(|_| {
             match *dir {
                 b'L' => tails[0].1 -= 1,
                 b'R' => tails[0].1 += 1,
                 b'D' => tails[0].0 -= 1,
-                _ => tails[0].0 += 1,
+                b'U' => tails[0].0 += 1,
+                _ => unreachable!(),
             }
-            (0..TAILS - 1).into_iter().for_each(|cur| {
-                let next = cur + 1;
-                let vdiff = tails[cur].0 - tails[next].0;
-                let hdiff = tails[cur].1 - tails[next].1;
-                match (hdiff.abs() > 1, vdiff.abs() > 1) {
-                    (true, true) => {
-                        tails[next] = (
-                            tails[next].0 + vdiff.signum(),
-                            tails[next].1 + hdiff.signum(),
-                        );
+            for cur in 0..TAILS {
+                let vdiff = tails[cur].0 - tails[cur + 1].0;
+                let hdiff = tails[cur].1 - tails[cur + 1].1;
+                match vdiff.abs() > 1 || hdiff.abs() > 1 {
+                    true => {
+                        tails[cur + 1] = (
+                            tails[cur + 1].0 + vdiff.signum(),
+                            tails[cur + 1].1 + hdiff.signum(),
+                        )
                     }
-                    _ => (),
+                    _ => continue,
                 }
-            });
-            coords.insert(tails[TAILS - 1]);
+            }
+            coords.insert(tails[TAILS]);
         });
     });
     coords.len() as i64
 }
 
-pub fn part_one(parsed: Vec<(u8, u16)>) -> i64 {
-    walk::<2>(parsed)
+pub fn part_one(parsed: &Vec<(u8, u16)>) -> i64 {
+    walk::<1>(&parsed)
 }
 
-pub fn part_two(parsed: Vec<(u8, u16)>) -> i64 {
-    walk::<10>(parsed)
+pub fn part_two(parsed: &Vec<(u8, u16)>) -> i64 {
+    walk::<9>(&parsed)
 }
 
 pub fn main() {
     let data = read_file::<9>();
     let parsed = parse(&data);
-    //println!("Part one: {}", part_one(parsed.clone()));
-    println!("Part two: {}", part_two(parsed));
+    println!("Part one: {}", part_one(&parsed));
+    println!("Part two: {}", part_two(&parsed));
+}
+
+#[cfg(test)]
+mod aoc_benching {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = read_file::<9>();
+        b.iter(|| parse(test::black_box(&input)))
+    }
+
+    #[bench]
+    fn part1bench(b: &mut test::Bencher) {
+        let read = read_file::<9>();
+        let input = parse(&read);
+        b.iter(|| assert_eq!(part_one(test::black_box(&input)), 6236))
+    }
+
+    #[bench]
+    fn part2bench(b: &mut test::Bencher) {
+        let read = read_file::<9>();
+        let input = parse(&read);
+        b.iter(|| assert_eq!(part_two(test::black_box(&input)), 2449))
+    }
 }
