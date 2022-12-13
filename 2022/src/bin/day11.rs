@@ -1,5 +1,7 @@
 #![feature(int_roundings)]
 #![feature(test)]
+use std::ops::Rem;
+
 use aoc2022::common::read_file;
 
 #[derive(Clone)]
@@ -13,6 +15,7 @@ pub struct Monkey {
     inspectcounter: usize,
 }
 
+#[cfg(debug_assertions)]
 impl std::fmt::Display for Monkey {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let inv = self
@@ -40,13 +43,13 @@ impl Monkey {
                 *worryval =
                 // The rounded down square root of u64::MAX so that we only ever
                 // do the operation if squaring causes overflow.
-                if *worryval > 4294967295 {
+                if 4294967295.lt(worryval) {
                     // This only happens in p2 anyways, and there the relief is 1
-                    *worryval % lcm
+                    worryval.rem(lcm)
                 } else {
                     worryval.div_floor(RELIEF)
                 };
-                if *worryval % self.testdiv == 0 {
+                if worryval.rem(self.testdiv) == 0 {
                     (self.truemonkey, *worryval)
                 } else {
                     (self.falsemonkey, *worryval)
@@ -171,7 +174,7 @@ pub fn round<const RELIEF: u64>(monkeys: &mut Vec<Monkey>, lcm: u64) -> (usize, 
     max2
 }
 
-#[inline]
+#[inline(always)]
 pub fn mult(vals: (usize, usize)) -> i64 {
     (vals.0 * vals.1) as i64
 }
