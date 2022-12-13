@@ -37,7 +37,12 @@ impl Monkey {
             .items
             .iter_mut()
             .map(|worryval| {
-                *worryval = worryval.div_floor(RELIEF) % lcm;
+                *worryval = worryval.div_floor(RELIEF);
+                // The rounded down square root of u64::MAX so that we only ever
+                // do the operation if squaring causes overflow.
+                if *worryval > 4294967295 {
+                    *worryval %= lcm;
+                }
                 if *worryval % self.testdiv == 0 {
                     (self.truemonkey, *worryval)
                 } else {
@@ -179,9 +184,7 @@ pub fn part_two(mut monks: Vec<Monkey>, lcm: u64) -> i64 {
     for _ in 1..10000 {
         round::<1>(&mut monks, lcm);
     }
-    let ret = round::<1>(&mut monks, lcm);
-    println!("{ret:#?}");
-    mult(ret)
+    mult(round::<1>(&mut monks, lcm))
 }
 
 pub fn main() {
