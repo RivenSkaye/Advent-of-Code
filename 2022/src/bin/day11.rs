@@ -1,6 +1,8 @@
 #![feature(int_roundings)]
+#![feature(test)]
 use aoc2022::common::read_file;
 
+#[derive(Clone)]
 pub struct Monkey {
     items: Vec<u64>,
     operation: fn(u64, u64) -> u64,
@@ -18,23 +20,24 @@ impl std::fmt::Display for Monkey {
             .iter()
             .map(|it| it.to_string())
             .collect::<Vec<String>>();
-        write!(f, "Monkey\n  Items: {}\n  Operation: old [+|*] {}\n  Test: mod {}\n    True => {}\n    False => {}",
+        write!(f, "Monkey\n  Items: {}\n  Operation: old [+|*] {}\n  Test: mod {}\n    True => {}\n    False => {}\n\tinspected {} items.\n---------------",
                inv.join(", "),
                self.opnumber,
                self.testdiv,
                self.truemonkey,
-               self.falsemonkey
+               self.falsemonkey,
+               self.inspectcounter
         )
     }
 }
 
 impl Monkey {
-    pub fn test(&mut self) -> Vec<(usize, u64)> {
+    pub fn test<const RELIEF: u64>(&mut self, lcm: u64) -> Vec<(usize, u64)> {
         let ret = self
             .items
             .iter_mut()
             .map(|worryval| {
-                *worryval = worryval.div_floor(3);
+                *worryval = worryval.div_floor(RELIEF) % lcm;
                 if *worryval % self.testdiv == 0 {
                     (self.truemonkey, *worryval)
                 } else {
@@ -54,88 +57,95 @@ impl Monkey {
     }
 }
 
-pub fn parse(input: &str) -> Vec<Monkey> {
-    input
-        .split("\n\n")
-        .map(|monkey| {
-            let mnk = monkey.as_bytes();
-            // Start at the beginning of its items
-            let mut i = 28;
-            // init a vec for it
-            let mut inv = Vec::new();
-            // loop time!
-            loop {
-                // Assume all items have a base value of 2 digits. Yolotime!
-                inv.push(((mnk[i] - b'0') * 10 + (mnk[i + 1] - b'0')) as u64);
-                i += 2;
-                // Check what follows the item's value
-                match mnk[i] {
-                    // comma denotes another item. Skip over the comma and the space, repeat loop
-                    b',' => i += 2,
-                    // newline denotes the end of the items.
-                    b'\n' => {
-                        // skip to the test operation numbers
-                        i += 26;
-                        break;
-                    }
-                    _ => unreachable!(),
-                }
-            }
-            // grab the operation, + or *
-            let op = mnk[i - 2];
-            let stressop: fn(u64, u64) -> u64 = match op {
-                b'*' => |x, y| if y == 0 { x * x } else { x * y },
-                _ => |x, y| if y == 0 { x + x } else { x + y },
-            };
-            // check the operation
-            let opnum = match (mnk[i], mnk[i + 1]) {
-                // if it starts with "o" it's "old"
-                (b'o', _) => {
+pub fn parse(input: &str) -> (Vec<Monkey>, u64) {
+    // We were already assuming no index higher than 9 anyways.
+    let mut primes = 1;
+    // Yes, we're doing the entire parsing thing inside of the return tuple
+    (
+        input
+            .split("\n\n")
+            .map(|monkey| {
+                let mnk = monkey.as_bytes();
+                // Start at the beginning of its items
+                let mut i = 28;
+                // init a vec for it
+                let mut inv = Vec::new();
+                // loop time!
+                loop {
+                    // Assume all items have a base value of 2 digits. Yolotime!
+                    inv.push(((mnk[i] - b'0') * 10 + (mnk[i + 1] - b'0')) as u64);
                     i += 2;
-                    0
+                    // Check what follows the item's value
+                    match mnk[i] {
+                        // comma denotes another item. Skip over the comma and the space, repeat loop
+                        b',' => i += 2,
+                        // newline denotes the end of the items.
+                        b'\n' => {
+                            // skip to the test operation numbers
+                            i += 26;
+                            break;
+                        }
+                        _ => unreachable!(),
+                    }
                 }
-                // every other case is a number followed by either another number, or a newline.
-                (n, b'\n') => (n - b'0') as u64,
-                (n, m) => {
-                    i += 1;
-                    ((n - b'0') * 10 + (m - b'0')) as u64
+                // grab the operation, + or *
+                let op = mnk[i - 2];
+                let stressop: fn(u64, u64) -> u64 = match op {
+                    b'*' => |x, y| if y == 0 { x * x } else { x * y },
+                    _ => |x, y| if y == 0 { x + x } else { x + y },
+                };
+                // check the operation
+                let opnum = match (mnk[i], mnk[i + 1]) {
+                    // if it starts with "o" it's "old"
+                    (b'o', _) => {
+                        i += 2;
+                        0
+                    }
+                    // every other case is a number followed by either another number, or a newline.
+                    (n, b'\n') => (n - b'0') as u64,
+                    (n, m) => {
+                        i += 1;
+                        ((n - b'0') * 10 + (m - b'0')) as u64
+                    }
+                };
+                // Skip to the 1 or 2 digit test divisor and capture it
+                i += 23;
+                let divisor = match mnk[i + 1] {
+                    b'\n' => (mnk[i] - b'0') as u64,
+                    _ => {
+                        i += 1;
+                        ((mnk[i - 1] - b'0') * 10 + (mnk[i] - b'0')) as u64
+                    }
+                };
+                // skip to the index of the true monkey. There are less than 11 (0-9), more yolomode
+                i += 31;
+                let truemonk = (mnk[i] - b'0') as usize;
+                // Rinse and repeat for the false monkey
+                i += 32;
+                let falsemonk = (mnk[i] - b'0') as usize;
+                primes *= divisor;
+                Monkey {
+                    items: inv,
+                    operation: stressop,
+                    opnumber: opnum,
+                    testdiv: divisor,
+                    truemonkey: truemonk,
+                    falsemonkey: falsemonk,
+                    inspectcounter: 0,
                 }
-            };
-            // Skip to the 1 or 2 digit test divisor and capture it
-            i += 23;
-            let divisor = match mnk[i + 1] {
-                b'\n' => (mnk[i] - b'0') as u64,
-                _ => {
-                    i += 1;
-                    ((mnk[i - 1] - b'0') * 10 + (mnk[i] - b'0')) as u64
-                }
-            };
-            // skip to the index of the true monkey. There are less than 11 (0-9), more yolomode
-            i += 31;
-            let truemonk = (mnk[i] - b'0') as usize;
-            // Rinse and repeat for the false monkey
-            i += 32;
-            let falsemonk = (mnk[i] - b'0') as usize;
-            Monkey {
-                items: inv,
-                operation: stressop,
-                opnumber: opnum,
-                testdiv: divisor,
-                truemonkey: truemonk,
-                falsemonkey: falsemonk,
-                inspectcounter: 0,
-            }
-        })
-        .collect()
+            })
+            .collect(),
+        primes,
+    )
 }
 
 #[inline]
-pub fn round(monkeys: &mut Vec<Monkey>) -> (usize, usize) {
+pub fn round<const RELIEF: u64>(monkeys: &mut Vec<Monkey>, lcm: u64) -> (usize, usize) {
     let mut max2 = (0, 0);
     for i in 0..monkeys.len() {
         monkeys[i].inspect();
         monkeys[i]
-            .test()
+            .test::<RELIEF>(lcm)
             .iter()
             .for_each(|(throw_to, worry)| unsafe {
                 monkeys.get_unchecked_mut(*throw_to).items.push(*worry)
@@ -158,15 +168,56 @@ pub fn mult(vals: (usize, usize)) -> i64 {
     (vals.0 * vals.1) as i64
 }
 
-pub fn part_one(mut monks: Vec<Monkey>) -> i64 {
-    for _ in 0..19 {
-        round(&mut monks);
+pub fn part_one(mut monks: Vec<Monkey>, lcm: u64) -> i64 {
+    for _ in 1..20 {
+        round::<3>(&mut monks, lcm);
     }
-    mult(round(&mut monks))
+    mult(round::<3>(&mut monks, lcm))
+}
+
+pub fn part_two(mut monks: Vec<Monkey>, lcm: u64) -> i64 {
+    for _ in 1..10000 {
+        round::<1>(&mut monks, lcm);
+    }
+    let ret = round::<1>(&mut monks, lcm);
+    println!("{ret:#?}");
+    mult(ret)
 }
 
 pub fn main() {
     let data = read_file::<11>();
-    let parsed = parse(&data);
-    println!("{}", part_one(parsed));
+    let (parsed, lcm) = parse(&data);
+    println!("{}", part_one(parsed.clone(), lcm));
+    println!("{}", part_two(parsed, lcm));
+}
+
+#[cfg(test)]
+mod aoc_benching {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = read_file::<11>();
+        b.iter(|| parse(test::black_box(&input)))
+    }
+
+    #[bench]
+    fn part1bench(b: &mut test::Bencher) {
+        let read = read_file::<11>();
+        let input = parse(&read);
+        b.iter(|| assert_eq!(part_one(test::black_box(input.0.clone()), input.1), 66124))
+    }
+
+    #[bench]
+    fn part2bench(b: &mut test::Bencher) {
+        let read = read_file::<11>();
+        let input = parse(&read);
+        b.iter(|| {
+            assert_eq!(
+                part_two(test::black_box(input.0.clone()), input.1),
+                19309892877
+            )
+        })
+    }
 }
