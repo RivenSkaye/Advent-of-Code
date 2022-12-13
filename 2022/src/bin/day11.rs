@@ -37,12 +37,15 @@ impl Monkey {
             .items
             .iter_mut()
             .map(|worryval| {
-                *worryval = worryval.div_floor(RELIEF);
+                *worryval =
                 // The rounded down square root of u64::MAX so that we only ever
                 // do the operation if squaring causes overflow.
                 if *worryval > 4294967295 {
-                    *worryval %= lcm;
-                }
+                    // This only happens in p2 anyways, and there the relief is 1
+                    *worryval % lcm
+                } else {
+                    worryval.div_floor(RELIEF)
+                };
                 if *worryval % self.testdiv == 0 {
                     (self.truemonkey, *worryval)
                 } else {
