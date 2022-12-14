@@ -7,6 +7,7 @@ def comp(left, right):
     Oldschool compare function like I was taught in Java in my freshman year.
 
     I tried normal list comparison before, but that gave the wrong result.
+    ~~shoutout to Setsu who taught me Java in Python works:tm:~~
 
     Returns a number greater than zero if right < left
     Returns 0 if right == left
