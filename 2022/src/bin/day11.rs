@@ -23,7 +23,12 @@ impl std::fmt::Display for Monkey {
             .iter()
             .map(|it| it.to_string())
             .collect::<Vec<String>>();
-        write!(f, "Monkey\n  Items: {}\n  Operation: old [+|*] {}\n  Test: mod {}\n    True => {}\n    False => {}\n\tinspected {} items.\n---------------",
+        let opchar = match (self.operation)(1, 1) {
+            1 => b'*',
+            2 => b'+',
+            _ => unreachable!(),
+        };
+        write!(f, "Monkey\n  Items: {}\n  Operation: old {opchar} {}\n  Test: mod {}\n    True => {}\n    False => {}\n\tinspected {} items.\n---------------",
                inv.join(", "),
                self.opnumber,
                self.testdiv,
