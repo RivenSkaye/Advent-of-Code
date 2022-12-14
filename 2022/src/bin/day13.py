@@ -51,7 +51,7 @@ def part_two(aoc_data):
             processed.append(eval(line))
     processed.sort(key=cmp_to_key(comp))
     two_idx = 0
-    curidx = 0;
+    curidx = 0
     find2 = True
     for p in processed:
         curidx += 1
