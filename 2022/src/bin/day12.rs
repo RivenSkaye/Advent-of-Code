@@ -1,5 +1,6 @@
 #![feature(test)]
 use aoc2022::common::read_file;
+use std::collections::VecDeque;
 
 pub enum Direction {
     UP,
@@ -57,14 +58,6 @@ pub struct Node {
     distance: usize,
 }
 impl Node {
-    pub fn cmp(self, other: Self) -> Self {
-        if other.distance < self.distance {
-            other
-        } else {
-            self
-        }
-    }
-
     pub fn cmp_dist(&mut self, new_dist: usize) {
         self.distance = self.distance.min(new_dist);
     }
@@ -140,73 +133,85 @@ pub fn parse(input: &str) -> (Grid, Position, Position) {
 }
 
 pub fn part_one(mut parsed: Grid, start: Position, end: Position) -> i64 {
-    let mut to_check = Vec::<Position>::new();
-    to_check.push(start);
-    let mut items = 1;
+    let mut to_check = VecDeque::<Position>::new();
+    to_check.push_back(start);
+    let maxy = parsed.len() - 1;
+    let maxx = parsed[0].len() - 1;
     let mut cur_steps = 0;
-    while items > 0 {
+    loop {
         for cur in to_check.clone() {
-            to_check.remove(0);
-            items -= 1;
+            if end == cur {
+                return cur_steps as i64;
+            }
+            to_check.pop_front();
             if parsed[cur.y][cur.x].visited {
                 continue;
             }
             let curnode = get_at(&parsed, &cur);
             if cur.y > 0 {
                 if curnode.can_walk(&get_at(&parsed, &cur.next(Direction::UP))) {
-                    to_check.push(cur.next(Direction::UP));
+                    to_check.push_back(cur.next(Direction::UP));
                 }
             }
             if cur.x > 0 {
                 if curnode.can_walk(&get_at(&parsed, &cur.next(Direction::LEFT))) {
-                    to_check.push(cur.next(Direction::LEFT));
+                    to_check.push_back(cur.next(Direction::LEFT));
                 }
             }
-            if cur.y < parsed.len() - 1 {
+            if cur.y < maxy {
                 if curnode.can_walk(&get_at(&parsed, &cur.next(Direction::DOWN))) {
-                    to_check.push(cur.next(Direction::DOWN));
+                    to_check.push_back(cur.next(Direction::DOWN));
                 }
             }
-            if cur.x < parsed[0].len() - 1 {
+            if cur.x < maxx {
                 if curnode.can_walk(&get_at(&parsed, &cur.next(Direction::RIGHT))) {
-                    to_check.push(cur.next(Direction::RIGHT));
+                    to_check.push_back(cur.next(Direction::RIGHT));
                 }
             }
-            parsed[cur.y][cur.x].cmp_dist(cur_steps);
             parsed[cur.y][cur.x].visited = true;
-            if end.eq(&cur) {
-                to_check.clear();
-                items = 0;
-                break;
-            }
-            items = to_check.len();
         }
         cur_steps += 1;
     }
-    if get_at(&parsed, &end).visited {
-        (cur_steps - 1) as i64
-    } else {
-        i64::MAX
-    }
 }
 
-pub fn part_two(parsed: Grid, end: Position) -> i64 {
-    (0..parsed.len())
-        .map(|y| {
-            (0..parsed[0].len())
-                .map(|x| {
-                    let ret = if parsed[y][x].height == b'a' {
-                        part_one(parsed.clone(), Position::new(x, y), end)
-                    } else {
-                        i64::MAX
-                    };
-                    ret
-                })
-                .min()
-                .unwrap()
-        })
-        .min()
-        .unwrap()
+pub fn part_two(mut parsed: Grid, end: Position) -> i64 {
+    let mut to_check = VecDeque::<Position>::new();
+    to_check.push_back(end);
+    let mut cur_steps = 0;
+    loop {
+        for cur in to_check.clone() {
+            if parsed[cur.y][cur.x].height == b'a' {
+                return cur_steps as i64;
+            }
+            to_check.pop_front();
+            if parsed[cur.y][cur.x].visited {
+                continue;
+            }
+            let curnode = get_at(&parsed, &cur);
+            if cur.y > 0 {
+                if get_at(&parsed, &cur.next(Direction::UP)).can_walk(&curnode) {
+                    to_check.push_back(cur.next(Direction::UP));
+                }
+            }
+            if cur.x > 0 {
+                if get_at(&parsed, &cur.next(Direction::LEFT)).can_walk(&curnode) {
+                    to_check.push_back(cur.next(Direction::LEFT));
+                }
+            }
+            if cur.y < parsed.len() - 1 {
+                if get_at(&parsed, &cur.next(Direction::DOWN)).can_walk(&curnode) {
+                    to_check.push_back(cur.next(Direction::DOWN));
+                }
+            }
+            if cur.x < parsed[0].len() - 1 {
+                if get_at(&parsed, &cur.next(Direction::RIGHT)).can_walk(&curnode) {
+                    to_check.push_back(cur.next(Direction::RIGHT));
+                }
+            }
+            parsed[cur.y][cur.x].visited = true;
+        }
+        cur_steps += 1;
+    }
 }
 
 pub fn main() {
