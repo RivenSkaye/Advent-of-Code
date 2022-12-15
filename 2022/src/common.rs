@@ -11,9 +11,7 @@ pub fn read_file<const DAY: usize>() -> String {
 
 #[inline(always)]
 pub fn stoi(s: &str) -> usize {
-    let mut i = 0;
     s.as_bytes()
         .iter()
-        .for_each(|c| i = (10 * i) + (c - b'0') as usize);
-    i
+        .fold(0, |i, c| (10 * i) + (c - b'0') as usize)
 }
