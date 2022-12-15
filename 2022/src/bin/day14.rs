@@ -1,3 +1,4 @@
+#![feature(test)]
 use aoc2022::common::{read_file, stoi};
 use std::iter::repeat_with;
 
@@ -97,4 +98,34 @@ pub fn main() {
         row.iter().for_each(|c| print!("{}", *c as char));
         println!("");
     });
+}
+
+mod aoc_benching {
+    extern crate test;
+    use super::*;
+
+    #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = read_file::<14>();
+        b.iter(|| parse(test::black_box(&input)))
+    }
+
+    #[bench]
+    fn part1bench(b: &mut test::Bencher) {
+        let read = read_file::<14>();
+        let (parsed, yfirst, ymax) = parse(&read);
+        b.iter(|| {
+            assert_eq!(
+                part_one(&mut test::black_box(parsed.clone()), yfirst, ymax),
+                719
+            )
+        })
+    }
+
+    #[bench]
+    fn part2bench(b: &mut test::Bencher) {
+        let read = read_file::<14>();
+        let (parsed, _, ymax) = parse(&read);
+        b.iter(|| assert_eq!(part_two(&mut test::black_box(parsed.clone()), ymax), 23390))
+    }
 }
