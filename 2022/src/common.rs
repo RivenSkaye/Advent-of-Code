@@ -15,3 +15,11 @@ pub fn stoi(s: &str) -> usize {
         .iter()
         .fold(0, |i, c| (10 * i) + (c - b'0') as usize)
 }
+
+#[inline(always)]
+pub fn stosi(s: &str) -> isize {
+    match s.starts_with('-') {
+        true => -(stoi(&s.replace('-', "")) as isize),
+        false => stoi(s) as isize,
+    }
+}
