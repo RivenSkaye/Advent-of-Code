@@ -66,7 +66,6 @@ const TARGET: i64 = 2000000;
 #[cfg(debug_assertions)]
 const TARGET: i64 = 10;
 
-#[inline]
 pub fn part_one(parsed: Vec<Sensor>) -> i64 {
     let mut covered = (0, 0);
     // We'll need to keep track of all beacons on the target line, as they're valid
@@ -101,7 +100,6 @@ pub fn in_range(x: i64, y: i64, sensor: &Sensor) -> bool {
     (x.abs_diff(sensor.point.0) + y.abs_diff(sensor.point.1)) < sensor.range + 1
 }
 
-#[inline]
 pub fn part_two(parsed: Vec<Sensor>) -> i64 {
     let mut x = MAXRANGE - 1;
     loop {
