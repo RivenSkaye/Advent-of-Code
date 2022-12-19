@@ -17,9 +17,9 @@ pub fn stoi(s: &str) -> usize {
 }
 
 #[inline(always)]
-pub fn stosi(s: &str) -> isize {
-    match s.starts_with('-') {
-        true => -(stoi(&s.replace('-', "")) as isize),
-        false => stoi(s) as isize,
+pub fn stosi(s: &[u8]) -> i64 {
+    match s[0] == b'-' {
+        true => s[1..].iter().fold(0, |i, c| (10 * i) - (c - b'0') as i64),
+        false => s.iter().fold(0, |i, c| (10 * i) + (c - b'0') as i64),
     }
 }
