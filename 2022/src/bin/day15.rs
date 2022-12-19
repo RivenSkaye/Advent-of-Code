@@ -33,7 +33,7 @@ impl Sensor {
 pub fn parse(input: &str) -> Vec<Sensor> {
     // Strip off all the useless garbo, it's noise.
     // That leaves us with xxx,yyy:xxx,yyy points!
-    input
+    let mut ret = input
         .lines()
         .map(|line| {
             let mut l = line.split(':');
@@ -56,8 +56,11 @@ pub fn parse(input: &str) -> Vec<Sensor> {
                     .unwrap(),
             )
         })
-        .collect()
+        .collect::<Vec<Sensor>>();
+    ret.sort_unstable_by(|l, r| r.point.0.cmp(&l.point.0));
+    ret
 }
+
 #[cfg(not(debug_assertions))]
 const TARGET: i64 = 2000000;
 #[cfg(debug_assertions)]
@@ -99,8 +102,7 @@ pub fn in_range(x: i64, y: i64, sensor: &Sensor) -> bool {
 }
 
 #[inline]
-pub fn part_two(mut parsed: Vec<Sensor>) -> i64 {
-    parsed.sort_by(|l, r| r.point.0.cmp(&l.point.0));
+pub fn part_two(parsed: Vec<Sensor>) -> i64 {
     let mut x = MAXRANGE - 1;
     loop {
         let mut y = 0;
