@@ -101,20 +101,16 @@ pub fn in_range(x: i64, y: i64, sensor: &Sensor) -> bool {
 
 pub fn part_two(parsed: Vec<Sensor>) -> i64 {
     let mut x = MAXRANGE - 1;
-    let mut y = 0;
     loop {
+        let mut y = 0;
         'yloop: while y < MAXRANGE {
-            for sensor in &parsed {
-                if in_range(x, y, sensor) {
-                    y = ((sensor.point.1 + sensor.range as i64)
-                        - sensor.point.0.abs_diff(x) as i64)
-                        + 1;
-                    continue 'yloop;
-                }
+            if let Some(sensor) = parsed.iter().find(|sensor| in_range(x, y, sensor)) {
+                y = ((sensor.point.1 as u64 + sensor.range) - sensor.point.0.abs_diff(x)) as i64
+                    + 1;
+                continue 'yloop;
             }
             return (x * 4000000) + y;
         }
-        y = 0;
         x -= 1;
     }
 }
