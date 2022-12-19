@@ -100,7 +100,7 @@ pub fn in_range(x: i64, y: i64, sensor: &Sensor) -> bool {
 
 #[inline]
 pub fn part_two(mut parsed: Vec<Sensor>) -> i64 {
-    parsed.sort_unstable_by(|l, r| r.point.0.cmp(&l.point.0));
+    parsed.sort_by(|l, r| r.point.0.cmp(&l.point.0));
     let mut x = MAXRANGE - 1;
     loop {
         let mut y = 0;
