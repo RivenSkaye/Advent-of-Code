@@ -30,7 +30,6 @@ impl Sensor {
     }
 }
 
-#[inline]
 pub fn parse(input: &str) -> Vec<Sensor> {
     // Strip off all the useless garbo, it's noise.
     // That leaves us with xxx,yyy:xxx,yyy points!
@@ -99,7 +98,9 @@ pub fn in_range(x: i64, y: i64, sensor: &Sensor) -> bool {
     (x.abs_diff(sensor.point.0) + y.abs_diff(sensor.point.1)) < sensor.range + 1
 }
 
-pub fn part_two(parsed: Vec<Sensor>) -> i64 {
+#[inline]
+pub fn part_two(mut parsed: Vec<Sensor>) -> i64 {
+    parsed.sort_unstable_by(|l, r| r.point.0.cmp(&l.point.0));
     let mut x = MAXRANGE - 1;
     loop {
         let mut y = 0;
