@@ -141,6 +141,7 @@ pub fn part_one(mut parsed: Grid, start: Position, end: Position) -> i64 {
     loop {
         for cur in to_check.clone() {
             if end == cur {
+                parsed[end.y][end.x].visited = true;
                 return cur_steps as i64;
             }
             to_check.pop_front();
@@ -181,6 +182,7 @@ pub fn part_two(mut parsed: Grid, end: Position) -> i64 {
     loop {
         for cur in to_check.clone() {
             if parsed[cur.y][cur.x].height == b'a' {
+                parsed[cur.y][cur.x].visited = true;
                 return cur_steps as i64;
             }
             to_check.pop_front();
