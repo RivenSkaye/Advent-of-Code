@@ -10,7 +10,8 @@ pub struct Valve {
 pub fn parse(input: &str) -> HashMap<u16, Valve> {
     input
         .lines()
-        .map(|line| {
+        .map(|sline| {
+            let line = sline.as_bytes();
             // If not for the different text when a valve only has a single tunnel,
             // this wouldn't be necessary. But the different text does three things:
             // 1) removes an s from tunnels (net -1)
@@ -21,24 +22,22 @@ pub fn parse(input: &str) -> HashMap<u16, Valve> {
             // 49 => 1 digit flow value, multiple tunnels. 1 char back is always a space
             // 49 => 2 digit flow value, one tunnel. 1 char back is always a space
             // 48 => 1 digit flow value, one tunnel. This char is a capital A-Z
-            let tunnels = match &line[48..49] {
-                "s" => 50,
-                " " => 49,
+            let tunnels = match line[48] {
+                b's' => 50,
+                b' ' => 49,
                 _ => 48,
             };
             (
-                line[6..8]
-                    .as_bytes()
-                    .iter()
-                    .fold(0, |a, b| (a << 8) | *b as u16),
+                line[6..8].iter().fold(0, |a, b| (a << 8) | *b as u16),
                 Valve {
-                    rate: line[23..25].as_bytes().iter().fold(0, |a, b| match b {
+                    rate: line[23..25].iter().fold(0, |a, b| match b {
                         b';' => a,
                         _ => (10 * a) + (b - b'0') as i64,
                     }),
                     connections: line[tunnels..]
-                        .split(", ")
-                        .map(|valve| valve.as_bytes().iter().fold(0, |a, b| (a << 8) | *b as u16))
+                        .split(|byte| b','.eq(byte) || b' '.eq(byte))
+                        .filter(|slc| slc.len() > 0)
+                        .map(|valve| valve.iter().fold(0, |a, b| (a << 8) | *b as u16))
                         .collect(),
                     open: false,
                 },
