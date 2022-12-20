@@ -11,7 +11,21 @@ pub fn parse(input: &str) -> HashMap<u16, Valve> {
     input
         .lines()
         .map(|line| {
-            let mut routes = 50;
+            // If not for the different text when a valve only has a single tunnel,
+            // this wouldn't be necessary. But the different text does three things:
+            // 1) removes an s from tunnels (net -1)
+            // 2) adds an s to lead (net 0)
+            // 3) removes an s from valves (net -1)
+            // This means that the tunnel list can start at positions:
+            // 50 => 2 digit flow value, multiple tunnels. 2 chars back is always an `s`
+            // 49 => 1 digit flow value, multiple tunnels. 1 char back is always a space
+            // 49 => 2 digit flow value, one tunnel. 1 char back is always a space
+            // 48 => 1 digit flow value, one tunnel. This char is a capital A-Z
+            let tunnels = match &line[48..49] {
+                "s" => 50,
+                " " => 49,
+                _ => 48,
+            };
             (
                 line[6..8]
                     .as_bytes()
@@ -19,13 +33,10 @@ pub fn parse(input: &str) -> HashMap<u16, Valve> {
                     .fold(0, |a, b| (a << 8) | *b as u16),
                 Valve {
                     rate: line[23..25].as_bytes().iter().fold(0, |a, b| match b {
-                        b';' => {
-                            routes = 49;
-                            a
-                        }
+                        b';' => a,
                         _ => (10 * a) + (b - b'0') as i64,
                     }),
-                    connections: line[routes..]
+                    connections: line[tunnels..]
                         .split(", ")
                         .map(|valve| valve.as_bytes().iter().fold(0, |a, b| (a << 8) | *b as u16))
                         .collect(),
@@ -38,5 +49,5 @@ pub fn parse(input: &str) -> HashMap<u16, Valve> {
 
 pub fn main() {
     let input = read_file::<16>();
-    let parsed = parse(&input);
+    let _parsed = parse(&input);
 }
