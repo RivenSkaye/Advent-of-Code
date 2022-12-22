@@ -114,6 +114,7 @@ pub fn valverun(
     curmax
 }
 
+#[inline]
 pub fn part_one(parsed: &Valves) -> i64 {
     valverun(AA, 0, parsed, 30, &mut HashMap::new(), 0, 0)
 }
@@ -241,6 +242,7 @@ pub fn double_valverun(
     curmax
 }
 
+#[inline]
 pub fn part_two(parsed: &Valves) -> i64 {
     double_valverun((AA, 0), (AA, 0), parsed, 26, &mut HashMap::new(), 0, 0)
 }
