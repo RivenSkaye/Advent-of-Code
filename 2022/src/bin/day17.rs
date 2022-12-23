@@ -64,10 +64,11 @@ pub fn move_window(window: &mut [[u8; 7]], width: usize) -> usize {
 
 pub fn sim<const STONES: usize>(input: &[u8]) -> i64 {
     let mut stacks = [0; 7];
-    let mut next_stone: &[(usize, usize)] = &DASH;
+    let mut next_stone: &[(usize, usize)];
     let mut jetcount = 0;
     // Set to 4: 3 above the dash.
     for stone in 0..STONES {
+        next_stone = match_shape(stone);
         let mut blockheight = *stacks.iter().max().unwrap() + 1;
         // Three spaces of free fall, always
         let mut x_offset = (jetcount..jetcount + 3)
@@ -107,7 +108,6 @@ pub fn sim<const STONES: usize>(input: &[u8]) -> i64 {
                 break;
             }
         }
-        next_stone = match_shape(stone + 1);
     }
     *stacks.iter().max().unwrap() as i64
 }
