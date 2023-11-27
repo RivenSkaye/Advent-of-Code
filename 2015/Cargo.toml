@@ -10,3 +10,4 @@
 
 [dependencies]
     mimalloc = {version = "^0.1", default-features = false}
+    md-5 = "0.10"
