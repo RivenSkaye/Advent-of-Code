@@ -13,7 +13,7 @@ use aoc2015::common;
 struct Point(isize, isize);
 
 impl Point {
-    fn step(&mut self, s: &u8) -> &Self {
+    fn step(&mut self, s: &u8) -> Self {
         match s {
             b'^' => self.1 += 1,
             b'v' => self.1 -= 1,
@@ -21,25 +21,24 @@ impl Point {
             b'<' => self.0 -= 1,
             _ => unreachable!()
         };
-        self
+        *self
     }
 }
 
-const START: Point = Point(0,0);
-
 fn part_one(input: &[u8]) -> usize {
-    let mut last = START;
-    let mut points = HashSet::with_capacity(5200);
-    points.insert(last);
-    input.iter().for_each(|step| {
-        points.insert(*last.step(step));
-    });
-    points.len()
+    let mut last = Point(0,0);
+    (0..input.len()).map(|i| last.step(&input[i])).collect::<HashSet<_>>().len()
+}
+
+fn part_two(input: &[u8]) -> usize {
+    let mut last = [Point(0,0); 2];
+    (0..input.len()).map(|i| last[i%2].step(&input[i])).collect::<HashSet<_>>().len()
 }
 
 fn main() {
     let bs = common::read_file::<3>().as_bytes().to_owned();
-    println!("{}", part_one(&bs))
+    println!("{}", part_one(&bs));
+    println!("{}", part_two(&bs))
 }
 
 #[cfg(test)]
@@ -51,11 +50,10 @@ mod aoc_benching {
         let bs = common::read_file::<3>().as_bytes().to_owned();
         b.iter(|| assert_eq!(part_one(test::black_box(&bs)), 2572));
     }
-/*
+
     #[bench]
     fn p2bench(b: &mut test::Bencher) {
-        let input = common::read_file::<2>();
-        let bs = parse(input.as_bytes());
-        b.iter(|| assert_eq!(part_two(test::black_box(&bs)), 3842356));
-    }*/
+        let bs = common::read_file::<3>().as_bytes().to_owned();
+        b.iter(|| assert_eq!(part_two(test::black_box(&bs)), 2631));
+    }
 }
