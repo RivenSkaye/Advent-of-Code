@@ -33,7 +33,7 @@ const NUMBERS: [&str; 9] = [
 
 // hint for inlining, use always to force
 #[inline]
-fn get_start(line: &&[u8], idx: usize) -> Option<usize> {
+fn get_start(line: &[u8], idx: usize) -> Option<usize> {
     NUMBERS.iter().zip(1..).find_map(|(num, val)| {
         line[idx..]
             .starts_with(num.as_bytes())
@@ -48,7 +48,7 @@ fn get_start(line: &&[u8], idx: usize) -> Option<usize> {
 }
 
 #[inline]
-fn get_end(line: &&[u8], idx: usize) -> Option<usize> {
+fn get_end(line: &[u8], idx: usize) -> Option<usize> {
     NUMBERS.iter().zip(1..).find_map(|(num, val)| {
         line[..=idx]
             .ends_with(num.as_bytes())
