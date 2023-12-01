@@ -2,10 +2,18 @@
 extern crate test;
 
 use aoc2023::common;
+use std::iter::Iterator;
 
-pub fn part_one(input: &[u8]) -> usize {
+use mimalloc::MiMalloc;
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
+pub fn parse(input: &[u8]) -> Vec<&[u8]> {
+    input.split(|chr| b'\n'.eq(chr)).collect()
+}
+
+pub fn part_one<'a>(input: impl Iterator<Item = &'a &'a [u8]>) -> usize {
     input
-        .split(|chr| b'\n'.eq(chr))
         .map(|line| {
             line.iter()
                 .find_map(|chr| chr.is_ascii_digit().then_some((chr - b'0') as usize * 10))
@@ -23,38 +31,45 @@ const NUMBERS: [&str; 9] = [
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
-pub fn part_two(input: &[u8]) -> usize {
+// hint for inlining, use always to force
+#[inline]
+fn get_start(line: &&[u8], idx: usize) -> Option<usize> {
+    NUMBERS.iter().zip(1..).find_map(|(num, val)| {
+        line[idx..]
+            .starts_with(num.as_bytes())
+            .then_some(val)
+            .or_else(|| {
+                line[idx]
+                    .is_ascii_digit()
+                    .then(|| (line[idx] - b'0') as usize)
+            })
+            .map(|v| v * 10)
+    })
+}
+
+#[inline]
+fn get_end(line: &&[u8], idx: usize) -> Option<usize> {
+    NUMBERS.iter().zip(1..).find_map(|(num, val)| {
+        line[..=idx]
+            .ends_with(num.as_bytes())
+            .then_some(val)
+            .or_else(|| {
+                line[idx]
+                    .is_ascii_digit()
+                    .then(|| (line[idx] - b'0') as usize)
+            })
+    })
+}
+
+pub fn part_two<'a>(input: impl Iterator<Item = &'a &'a [u8]>) -> usize {
     input
-        .split(|chr| b'\n'.eq(chr))
         .map(|line| {
             (0..line.len())
-                .find_map(|idx| {
-                    NUMBERS.iter().zip(1..).find_map(|(num, val)| {
-                        line[idx..]
-                            .starts_with(num.as_bytes())
-                            .then_some(val * 10)
-                            .or_else(|| {
-                                line[idx]
-                                    .is_ascii_digit()
-                                    .then(|| (line[idx] - b'0') as usize * 10)
-                            })
-                    })
-                })
+                .find_map(|idx| get_start(line, idx))
                 .unwrap()
                 + (0..line.len())
                     .rev()
-                    .find_map(|idx| {
-                        NUMBERS.iter().zip(1..).find_map(|(num, val)| {
-                            line[..=idx]
-                                .ends_with(num.as_bytes())
-                                .then_some(val)
-                                .or_else(|| {
-                                    line[idx]
-                                        .is_ascii_digit()
-                                        .then(|| (line[idx] - b'0') as usize)
-                                })
-                        })
-                    })
+                    .find_map(|idx| get_end(line, idx))
                     .unwrap()
         })
         .sum()
@@ -62,14 +77,15 @@ pub fn part_two(input: &[u8]) -> usize {
 
 pub fn main() {
     let data = common::read_file::<1>();
-    // println!("{}", part_one(&data));
+    let parsed = parse(&data);
+    // println!("{}", part_one(parsed.iter()));
     // Due to the example datasets being different, part one PANICS.
     // Replace test_inputs/day01.txt with the following:
     // 1abc2
     // pqr3stu8vwx
     // a1b2c3d4e5f
     // treb7uchet
-    println!("{}", part_two(&data))
+    println!("{}", part_two(parsed.iter()))
 }
 
 #[cfg(test)]
@@ -77,14 +93,23 @@ mod aoc_benching {
     use super::*;
 
     #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = common::read_file::<1>();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(parse(test::black_box(&input)), parsed))
+    }
+
+    #[bench]
     fn part1bench(b: &mut test::Bencher) {
         let input = common::read_file::<1>();
-        b.iter(|| assert_eq!(part_one(test::black_box(&input)), 54968))
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(part_one(test::black_box(parsed.iter())), 54968))
     }
 
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
         let input = common::read_file::<1>();
-        b.iter(|| assert_eq!(part_two(test::black_box(&input)), 54094))
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(part_two(test::black_box(parsed.iter())), 54094))
     }
 }
