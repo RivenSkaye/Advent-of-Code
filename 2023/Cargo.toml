@@ -1,0 +1,14 @@
+[package]
+    authors     = ["Riven Skaye // Martin <riven@tae.moe>"]
+    description = "Solutions for as far as I'll get with the AoC 2023."
+    edition     = "2021"
+    license     = "MIT"
+    name        = "aoc2023"
+    version     = "0.1.0"
+
+    # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+    # No default features because we don't need mimalloc to add overhead
+    # guaranteeing the same memory safety that Rust enforces by design.
+    mimalloc = { version = "^0.1", default-features = false }
