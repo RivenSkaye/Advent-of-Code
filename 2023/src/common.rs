@@ -3,10 +3,6 @@ const FILENAME: &str = "test_inputs";
 #[cfg(not(debug_assertions))]
 const FILENAME: &str = "inputs";
 
-use mimalloc::MiMalloc;
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
-
 #[inline(always)]
 pub fn read_file<const DAY: usize>() -> Vec<u8> {
     println!("Reading `{FILENAME}`");
