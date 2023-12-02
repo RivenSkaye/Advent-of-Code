@@ -64,7 +64,7 @@ pub fn parse(input: &[u8]) -> Vec<MaxRGB> {
                             res.3 = res.3.max(cubecount);
                             color_start += 5
                         }
-                        a => unreachable!("{}", String::from_utf8([a].into()).unwrap()),
+                        _ => unreachable!(),
                     }
                     if chunk
                         .get(color_start)
