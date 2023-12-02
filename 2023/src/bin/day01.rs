@@ -1,12 +1,16 @@
 #![feature(test)]
 extern crate test;
 
-use aoc2023::common;
-use std::iter::Iterator;
-
 use mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
+
+use aoc2023::common;
+use std::iter::Iterator;
+
+const NUMBERS: [&str; 9] = [
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+];
 
 pub fn parse(input: &[u8]) -> Vec<&[u8]> {
     input.split(|chr| b'\n'.eq(chr)).collect()
@@ -42,10 +46,6 @@ pub fn old_part_one(input: &[u8]) -> usize {
         })
         .sum()
 }
-
-const NUMBERS: [&str; 9] = [
-    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-];
 
 // hint for inlining, use always to force
 #[inline(always)]
