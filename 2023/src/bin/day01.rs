@@ -27,12 +27,28 @@ pub fn part_one<'a>(input: impl Iterator<Item = &'a &'a [u8]>) -> usize {
         .sum()
 }
 
+pub fn old_part_one(input: &[u8]) -> usize {
+    input
+        .split(|c| b'\n'.eq(c))
+        .map(|line| {
+            line.iter()
+                .find_map(|chr| chr.is_ascii_digit().then_some((chr - b'0') as usize * 10))
+                .unwrap()
+                + line
+                    .iter()
+                    .rev()
+                    .find_map(|chr| chr.is_ascii_digit().then_some((chr - b'0') as usize))
+                    .unwrap()
+        })
+        .sum()
+}
+
 const NUMBERS: [&str; 9] = [
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
 // hint for inlining, use always to force
-#[inline]
+#[inline(always)]
 fn get_start(line: &[u8], idx: usize) -> Option<usize> {
     NUMBERS.iter().zip(1..).find_map(|(num, val)| {
         line[idx..]
@@ -47,7 +63,7 @@ fn get_start(line: &[u8], idx: usize) -> Option<usize> {
     })
 }
 
-#[inline]
+#[inline(always)]
 fn get_end(line: &[u8], idx: usize) -> Option<usize> {
     NUMBERS.iter().zip(1..).find_map(|(num, val)| {
         line[..=idx]
@@ -75,6 +91,21 @@ pub fn part_two<'a>(input: impl Iterator<Item = &'a &'a [u8]>) -> usize {
         .sum()
 }
 
+pub fn old_part_two(input: &[u8]) -> usize {
+    input
+        .split(|c| b'\n'.eq(c))
+        .map(|line| {
+            (0..line.len())
+                .find_map(|idx| get_start(line, idx))
+                .unwrap()
+                + (0..line.len())
+                    .rev()
+                    .find_map(|idx| get_end(line, idx))
+                    .unwrap()
+        })
+        .sum()
+}
+
 pub fn main() {
     let data = common::read_file::<1>();
     let parsed = parse(&data);
@@ -85,7 +116,7 @@ pub fn main() {
     // pqr3stu8vwx
     // a1b2c3d4e5f
     // treb7uchet
-    println!("{}", part_two(parsed.iter()))
+    println!("{}", part_two(parsed.iter()));
 }
 
 #[cfg(test)]
@@ -111,5 +142,17 @@ mod aoc_benching {
         let input = common::read_file::<1>();
         let parsed = parse(&input);
         b.iter(|| assert_eq!(part_two(test::black_box(parsed.iter())), 54094))
+    }
+
+    #[bench]
+    fn old_part1_bench(b: &mut test::Bencher) {
+        let input = common::read_file::<1>();
+        b.iter(|| assert_eq!(old_part_one(test::black_box(&input)), 54968))
+    }
+
+    #[bench]
+    fn old_part2_bench(b: &mut test::Bencher) {
+        let input = common::read_file::<1>();
+        b.iter(|| assert_eq!(old_part_two(test::black_box(&input)), 54094))
     }
 }
