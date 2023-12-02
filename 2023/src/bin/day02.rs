@@ -13,7 +13,7 @@ const MAX_GREEN: usize = 13;
 const MAX_BLUE: usize = 14;
 
 /// Game, max red, max blue, max green
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct MaxRGB(usize, usize, usize, usize);
 
 impl From<(usize, usize, usize, usize)> for MaxRGB {
