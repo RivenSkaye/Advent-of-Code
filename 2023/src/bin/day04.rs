@@ -6,6 +6,8 @@ use mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
+use std::collections::HashMap;
+
 use aoc2023::common;
 
 pub fn parse(input: &[u8]) -> Vec<(Vec<usize>, Vec<usize>)> {
@@ -22,7 +24,7 @@ pub fn parse(input: &[u8]) -> Vec<(Vec<usize>, Vec<usize>)> {
             let s = scratched
                 .split(|c| b' '.eq(c) || b'\n'.eq(c))
                 .filter(|s| !s.is_empty())
-                .take_while(|s| !s.starts_with(b"Card"))
+                .take_while(|s| b'C' != s[0])
                 .map(|s| s.iter().fold(0, |a, b| (a * 10) + (b - b'0') as usize))
                 .collect();
             (w, s)
@@ -34,10 +36,32 @@ pub fn part_one(parsed: &[(Vec<usize>, Vec<usize>)]) -> usize {
     parsed
         .iter()
         .filter_map(|(winners, scratched)| {
-            match scratched.iter().filter(|n| winners.contains(n)).count() {
-                0 => None,
-                n => Some(2usize.pow((n - 1) as u32)),
+            scratched
+                .iter()
+                .filter(|n| winners.contains(n))
+                .count()
+                .checked_sub(1)
+                .map(|n| 2usize.pow(n as u32))
+        })
+        .sum()
+}
+
+pub fn part_two(parsed: &[(Vec<usize>, Vec<usize>)]) -> usize {
+    let mut wins = HashMap::<usize, usize>::with_capacity(parsed.len() * 2);
+    parsed
+        .iter()
+        .zip(1..)
+        .map(|((winners, scratched), next)| {
+            // base amount of wins
+            let n = scratched.iter().filter(|n| winners.contains(n)).count();
+            // how many copies of this card we got
+            let dups = wins.get(&next).unwrap_or(&0) + 1;
+            // for the next n cards...
+            for k in (next + 1)..=(next + n) {
+                // add a copy for every duplicate of this card
+                wins.insert(k, wins.get(&k).unwrap_or(&0) + dups);
             }
+            dups
         })
         .sum()
 }
@@ -46,6 +70,7 @@ pub fn main() {
     let input = common::read_file::<4>();
     let parsed = parse(&input);
     println!("{}", part_one(&parsed));
+    println!("{}", part_two(&parsed));
 }
 
 #[cfg(test)]
@@ -65,11 +90,11 @@ mod aoc_benching {
         let parsed = parse(&input);
         b.iter(|| assert_eq!(part_one(test::black_box(&parsed)), 26218))
     }
-    /*
+
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
         let input = common::read_file::<4>();
         let parsed = parse(&input);
-        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 63307))
-    }*/
+        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 9997537))
+    }
 }
