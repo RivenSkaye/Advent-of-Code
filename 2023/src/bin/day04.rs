@@ -49,10 +49,9 @@ pub fn part_one(parsed: &[(Vec<usize>, Vec<usize>)]) -> usize {
 
 pub fn part_two(parsed: &[(Vec<usize>, Vec<usize>)]) -> usize {
     let mut wins = HashMap::<usize, usize>::with_capacity(parsed.len() * 2);
-    parsed
-        .iter()
-        .zip(1..)
-        .map(|((winners, scratched), next)| {
+    (1..)
+        .zip(parsed.iter())
+        .map(|(next, (winners, scratched))| {
             // base amount of wins
             let n = scratched.iter().filter(|n| winners.contains(n)).count();
             // how many copies of this card we got
