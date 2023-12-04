@@ -35,13 +35,14 @@ pub fn parse(input: &[u8]) -> Vec<(Vec<usize>, Vec<usize>)> {
 pub fn part_one(parsed: &[(Vec<usize>, Vec<usize>)]) -> usize {
     parsed
         .iter()
-        .filter_map(|(winners, scratched)| {
+        .map(|(winners, scratched)| {
             scratched
                 .iter()
                 .filter(|n| winners.contains(n))
                 .count()
                 .checked_sub(1)
                 .map(|n| 2usize.pow(n as u32))
+                .unwrap_or_default()
         })
         .sum()
 }
