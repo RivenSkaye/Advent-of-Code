@@ -1,4 +1,3 @@
-#![feature(byte_slice_trim_ascii)]
 #![feature(test)]
 extern crate test;
 
