@@ -21,12 +21,12 @@ pub fn part_one<'a>(input: impl Iterator<Item = &'a &'a [u8]>) -> usize {
         .map(|line| {
             line.iter()
                 .find_map(|chr| chr.is_ascii_digit().then_some((chr - b'0') as usize * 10))
-                .unwrap()
+                .unwrap_or_default()
                 + line
                     .iter()
                     .rev()
                     .find_map(|chr| chr.is_ascii_digit().then_some((chr - b'0') as usize))
-                    .unwrap()
+                    .unwrap_or_default()
         })
         .sum()
 }
@@ -109,13 +109,7 @@ pub fn old_part_two(input: &[u8]) -> usize {
 pub fn main() {
     let data = common::read_file::<1>();
     let parsed = parse(&data);
-    // println!("{}", part_one(parsed.iter()));
-    // Due to the example datasets being different, part one PANICS.
-    // Replace test_inputs/day01.txt with the following:
-    // 1abc2
-    // pqr3stu8vwx
-    // a1b2c3d4e5f
-    // treb7uchet
+    println!("{}", part_one(parsed.iter()));
     println!("{}", part_two(parsed.iter()));
 }
 
