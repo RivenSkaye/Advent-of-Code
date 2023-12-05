@@ -12,6 +12,11 @@ pub fn read_file<const DAY: usize>() -> Vec<u8> {
         .to_owned()
 }
 
+pub fn read_str<const DAY: usize>() -> String {
+    println!("Reading `{FILENAME}`");
+    std::fs::read_to_string(format!("{FILENAME}/day{DAY:0>2}.txt")).unwrap()
+}
+
 #[inline(always)]
 pub fn stoi(s: &str) -> usize {
     s.as_bytes()
