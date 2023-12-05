@@ -9,12 +9,16 @@ pub fn read_file<const DAY: usize>() -> Vec<u8> {
     std::fs::read(format!("{FILENAME}/day{DAY:0>2}.txt"))
         .unwrap()
         .trim_ascii()
-        .to_owned()
+        .iter()
+        .filter_map(|c| b'\r'.ne(c).then_some(*c))
+        .collect()
 }
 
 pub fn read_str<const DAY: usize>() -> String {
     println!("Reading `{FILENAME}`");
-    std::fs::read_to_string(format!("{FILENAME}/day{DAY:0>2}.txt")).unwrap()
+    std::fs::read_to_string(format!("{FILENAME}/day{DAY:0>2}.txt"))
+        .unwrap()
+        .replace("\r", "")
 }
 
 #[inline(always)]
