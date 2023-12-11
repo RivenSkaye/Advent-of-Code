@@ -24,9 +24,7 @@ pub fn read_str<const DAY: usize>() -> String {
 
 #[inline(always)]
 pub fn stoi(s: &str) -> usize {
-    s.as_bytes()
-        .iter()
-        .fold(0, |i, c| (10 * i) + (c - b'0') as usize)
+    s.bytes().fold(0, |i, c| (10 * i) + (c - b'0') as usize)
 }
 
 #[inline(always)]
