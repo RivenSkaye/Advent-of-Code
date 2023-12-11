@@ -33,8 +33,8 @@ pub fn parse(input: &str) -> (Vec<(f64, f64)>, (f64, f64)) {
 
 #[inline(always)]
 fn solve((time, dist): &(f64, f64)) -> usize {
-    (((time / 2.0) + ((time * time / 4.0) - dist).sqrt()).floor()
-        - ((time / 2.0) - ((time * time / 4.0) - dist).sqrt()).ceil()) as usize
+    ((((time / 2.0) + ((time * time / 4.0) - dist).sqrt()) - 1.0).ceil()
+        - (((time / 2.0) - ((time * time / 4.0) - dist).sqrt()) + 1.0).floor()) as usize
         + 1
 }
 
