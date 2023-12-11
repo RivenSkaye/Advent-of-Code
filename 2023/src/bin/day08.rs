@@ -96,6 +96,8 @@ pub fn part_two(directions: &[usize], maps: &HashMap<u32, [u32; 2]>) -> usize {
 pub fn main() {
     let data = common::read_file::<8>();
     let (dirs, maps) = parse(&data);
+    // Part 1 example input produces the same result for 6;
+    // just slightly faster since it has fewer maps.
     println!("{}", part_one(&dirs, &maps));
     println!("{}", part_two(&dirs, &maps));
 }
