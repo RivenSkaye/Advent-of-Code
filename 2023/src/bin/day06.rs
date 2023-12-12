@@ -20,11 +20,18 @@ pub fn parse(input: &str) -> (Vec<(f64, f64)>, (f64, f64)) {
             (
                 time.split_ascii_whitespace()
                     .zip(dist.split_ascii_whitespace())
-                    .map(|(t, d)| (common::stoi(t) as f64, common::stoi(d) as f64))
+                    .map(|(t, d)| (common::stoi(t) as f64, (common::stoi(d) + 1) as f64))
                     .collect(),
                 (
-                    common::stoi(&time.replace(' ', "")) as f64,
-                    common::stoi(&dist.replace(' ', "")) as f64,
+                    (time
+                        .bytes()
+                        .filter(|c| c.is_ascii_digit())
+                        .fold(0, |a, b| (10 * a) + (b - b'0') as usize)) as f64,
+                    ((dist
+                        .bytes()
+                        .filter(|c| c.is_ascii_digit())
+                        .fold(0, |a, b| (10 * a) + (b - b'0') as usize))
+                        + 1) as f64,
                 ),
             )
         })
@@ -33,8 +40,8 @@ pub fn parse(input: &str) -> (Vec<(f64, f64)>, (f64, f64)) {
 
 #[inline(always)]
 fn solve((time, dist): &(f64, f64)) -> usize {
-    ((((time / 2.0) + ((time * time / 4.0) - dist).sqrt()) - 1.0).ceil()
-        - (((time / 2.0) - ((time * time / 4.0) - dist).sqrt()) + 1.0).floor()) as usize
+    (((time / 2.0) + ((time * time / 4.0) - dist).sqrt()).floor()
+        - ((time / 2.0) - ((time * time / 4.0) - dist).sqrt()).ceil()) as usize
         + 1
 }
 
@@ -50,6 +57,7 @@ pub fn main() {
     let data = common::read_str::<6>();
     let parsed = parse(&data);
     println!("{}", part_one(&parsed.0));
+    println!("{parsed:?}");
     println!("{}", part_two(&parsed.1));
 }
 
