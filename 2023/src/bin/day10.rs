@@ -113,6 +113,7 @@ impl Direction {
         }
     }
 
+    #[inline(always)]
     pub fn step(self, pos: &Point, map: &Map) -> Option<(Self, Point)> {
         let next_pos = self.next_coords(pos)?;
         // Check step returns None if the next pipe in this direction is a wall
