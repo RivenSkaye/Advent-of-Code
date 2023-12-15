@@ -30,7 +30,7 @@ pub enum Direction {
 }
 
 #[cfg(debug_assertions)]
-const MAP_DIMENSIONS: usize = 5;
+const MAP_DIMENSIONS: usize = 10;
 #[cfg(not(debug_assertions))]
 const MAP_DIMENSIONS: usize = 140;
 
@@ -44,10 +44,19 @@ const ALL_DIRS: [Direction; 4] = [
 #[derive(Debug, Clone, Copy)]
 pub struct Point(usize, usize);
 
+// Take into account that the part 2 test input is 10 x 20 tiles
+// but it's still a valid loop
+#[cfg(debug_assertions)]
+pub type Map = [[Pipe; MAP_DIMENSIONS * 2]; MAP_DIMENSIONS];
+#[cfg(not(debug_assertions))]
 pub type Map = [[Pipe; MAP_DIMENSIONS]; MAP_DIMENSIONS];
 
 pub fn parse(input: &[u8]) -> (Map, Point) {
+    #[cfg(debug_assertions)]
+    let mut map: Map = [[Pipe::NoPipe; MAP_DIMENSIONS * 2]; MAP_DIMENSIONS];
+    #[cfg(not(debug_assertions))]
     let mut map: Map = [[Pipe::NoPipe; MAP_DIMENSIONS]; MAP_DIMENSIONS];
+
     let mut start = Point(0, 0);
     input
         .split(|c| b'\n'.eq(c))
@@ -102,6 +111,9 @@ impl Direction {
     pub fn next_coords(self, pos: &Point) -> Option<Point> {
         match self {
             Self::Left if pos.1 != 0 => Some(Point(pos.0, pos.1 - 1)),
+            #[cfg(debug_assertions)]
+            Self::Right if pos.1 != (MAP_DIMENSIONS * 2) - 1 => Some(Point(pos.0, pos.1 + 1)),
+            #[cfg(not(debug_assertions))]
             Self::Right if pos.1 != MAP_DIMENSIONS - 1 => Some(Point(pos.0, pos.1 + 1)),
             Self::Up if pos.0 != 0 => Some(Point(pos.0 - 1, pos.1)),
             Self::Down if pos.0 != MAP_DIMENSIONS - 1 => Some(Point(pos.0 + 1, pos.1)),
@@ -154,6 +166,7 @@ pub fn part_two((map, start_pos): &(Map, Point)) -> usize {
 pub fn main() {
     let data = common::read_file::<10>();
     let parsed = parse(&data);
+    // The last test input for p2 produces a result of 80
     println!("{}", part_one(&parsed));
     //println!("{}", part_two(&parsed));
 }
