@@ -106,9 +106,9 @@ impl Direction {
     pub fn next_coords(self, pos: &Point) -> Option<Point> {
         match self {
             Self::Left if pos.1 != 0 => Some(Point(pos.0, pos.1 - 1)),
-            Self::Right if pos.1 != usize::MAX => Some(Point(pos.0, pos.1 + 1)),
+            Self::Right if pos.1 != MAP_DIMENSIONS - 1 => Some(Point(pos.0, pos.1 + 1)),
             Self::Up if pos.0 != 0 => Some(Point(pos.0 - 1, pos.1)),
-            Self::Down if pos.0 != usize::MAX => Some(Point(pos.0 + 1, pos.1)),
+            Self::Down if pos.0 != MAP_DIMENSIONS - 1 => Some(Point(pos.0 + 1, pos.1)),
             _ => None,
         }
     }
