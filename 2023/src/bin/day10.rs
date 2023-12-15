@@ -41,7 +41,7 @@ const ALL_DIRS: [Direction; 4] = [
     Direction::Down,
 ];
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Point(usize, usize);
 
 // Take into account that the part 2 test input is 10 x 20 tiles
@@ -145,10 +145,8 @@ pub fn part_one((map, start_pos): &(Map, Point)) -> usize {
                 dir = d;
                 steps += 1;
             }
-            match dir.next_coords(&pos)? {
-                Point(y, x) if map[y][x] == Pipe::Start => Some(steps + 1),
-                _ => None,
-            }
+            dir.next_coords(&pos)
+                .and_then(|Point(y, x)| (map[y][x] == Pipe::Start).then_some(steps + 1))
         })
         .unwrap()
         / 2
