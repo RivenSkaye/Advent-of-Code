@@ -1,11 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use mimalloc::MiMalloc;
-#[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
-
-use std::{mem::transmute, ops::Div};
+use std::mem::transmute;
 
 use aoc2023::common;
 
@@ -143,7 +139,7 @@ pub fn part_one((map, start_pos): &(Map, Point)) -> usize {
             }
         })
         .unwrap()
-        .div(2usize)
+        / 2
 }
 
 pub fn part_two((map, start_pos): &(Map, Point)) -> usize {
