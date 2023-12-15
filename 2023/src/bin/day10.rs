@@ -13,10 +13,10 @@ use aoc2023::common;
 pub enum Pipe {
     UpDown = b'|',    // xConnec, y +/- 1
     LeftRight = b'-', // x +/- 1, y
-    DownRight = b'L', // x + 1, y || x, y - 1
-    DownLeft = b'J',  // x - 1, y || x, y - 1
-    UpLeft = b'7',    // x, y + 1 || x - 1, y
-    UpRight = b'F',   // x + 1, y || x, y + 1
+    DownRight = b'L', // x + 1, y | | x, y - 1
+    DownLeft = b'J',  // x - 1, y | | x, y - 1
+    UpLeft = b'7',    // x, y + 1 | | x - 1, y
+    UpRight = b'F',   // x + 1, y | | x, y + 1
     NoPipe = b'.',    // Can't step
     Start = b'S',     // Wildcard
 }
