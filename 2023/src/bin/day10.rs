@@ -135,9 +135,6 @@ pub fn part_one((map, start_pos): &(Map, Point)) -> usize {
                 pos = p;
                 dir = d;
                 steps += 1;
-                if map[pos.0][pos.1] == Pipe::Start {
-                    return Some(steps / 2);
-                }
             }
             match dir.next_coords(&pos)? {
                 Point(y, x) if map[y][x] == Pipe::Start => Some(steps + 1),
