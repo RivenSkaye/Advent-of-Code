@@ -21,7 +21,7 @@ pub enum Pipe {
     Start = b'S',     // Wildcard
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
     Left = 1,
     Right = 2,
@@ -145,6 +145,9 @@ pub fn part_one((map, start_pos): &(Map, Point)) -> usize {
                 dir = d;
                 steps += 1;
             }
+            // Uncomment this print statement to find the first legal direction for S
+            // It will be the last printed direction (for my input both down and left are legal)
+            // println!("{direction:?}");
             dir.next_coords(&pos)
                 .and_then(|Point(y, x)| (map[y][x] == Pipe::Start).then_some(steps + 1))
         })
@@ -153,12 +156,56 @@ pub fn part_one((map, start_pos): &(Map, Point)) -> usize {
 }
 
 pub fn part_two((map, start_pos): &(Map, Point)) -> usize {
-    // Cheap optimization: skip checking any rows and columns outside of the loop's outer bounds
-    let mut min_y = usize::MAX;
-    let mut max_y = usize::MIN;
-    let mut min_x = usize::MAX;
-    let mut max_x = usize::MIN;
-    0
+    #[cfg(debug_assertions)]
+    const MAX_X: usize = MAP_DIMENSIONS * 2;
+    #[cfg(not(debug_assertions))]
+    const MAX_X: usize = MAP_DIMENSIONS;
+
+    const WALK_HALF: [Pipe; 3] = [Pipe::UpDown, Pipe::DownLeft, Pipe::DownRight];
+
+    let mut counted_squares = 0;
+    let mut edges = Vec::with_capacity(MAP_DIMENSIONS);
+    edges.push(*start_pos);
+    // found in part 1
+    #[cfg(debug_assertions)]
+    let (mut cur_dir, mut cur_pos) = (Direction::Down, *start_pos);
+    #[cfg(not(debug_assertions))]
+    let (mut cur_dir, mut cur_pos) = (Direction::Left, *start_pos);
+    while let Some((d, p)) = cur_dir.step(&cur_pos, &map) {
+        edges.push(p);
+        cur_pos = p;
+        cur_dir = d;
+    }
+    // Limit search area to the loop's bounds
+    // Search using the Jordan Curve Theorem.
+    // - Walk just off the midline of your pipes. I chose bottom half.
+    // - Cast rays in one direction and count all squares inside the the loop bounds
+    // - Being inside means crossing the edge an odd number of times
+    // - You can't cross an edge if it's in the ray's direction
+    // - Edge points do not count as inside
+    //
+    // For visualization of the map, comment out the print statements
+    // Anything that is part of the loop is marked ░
+    // Any junk tiles are █
+    // And ╳ marks the spot for possible nest tiles
+    for y in 0..MAP_DIMENSIONS {
+        let mut inside = false;
+        for x in 0..MAX_X {
+            if edges.contains(&Point(y, x)) {
+                // print!("░");
+                if WALK_HALF.contains(&map[y][x]) {
+                    inside = !inside;
+                }
+            } else if inside {
+                // print!("╳");
+                counted_squares += 1;
+            } // else {
+              // print!("█");
+              // }
+        }
+        // println!("");
+    }
+    counted_squares
 }
 
 pub fn main() {
@@ -166,7 +213,7 @@ pub fn main() {
     let parsed = parse(&data);
     // The last test input for p2 produces a result of 80
     println!("{}", part_one(&parsed));
-    //println!("{}", part_two(&parsed));
+    println!("{}", part_two(&parsed));
 }
 
 #[cfg(test)]
@@ -186,10 +233,10 @@ mod aoc_benching {
         b.iter(|| assert_eq!(part_one(test::black_box(&parsed)), 6842))
     }
 
-    /*#[bench]
+    #[bench]
     fn part2bench(b: &mut test::Bencher) {
         let input = common::read_file::<10>();
         let parsed = parse(&input);
-        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 928))
-    }*/
+        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 393))
+    }
 }
