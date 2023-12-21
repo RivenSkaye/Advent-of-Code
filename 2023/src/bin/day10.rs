@@ -57,21 +57,19 @@ pub fn parse(input: &[u8]) -> (Map, Point) {
     #[cfg(not(debug_assertions))]
     let mut map: Map = [[Pipe::NoPipe; MAP_DIMENSIONS]; MAP_DIMENSIONS];
 
-    let mut start = Point(0, 0);
+    let mut start: Option<Point> = None;
     input
         .split(|c| b'\n'.eq(c))
         .enumerate()
         .for_each(|(y, line)| {
-            line.iter().enumerate().for_each(|(x, &chr)| {
-                if b'S' == chr {
-                    start.0 = y;
-                    start.1 = x;
+            for (x, &chr) in line.iter().enumerate() {
+                if b'S' == chr && start.is_none() {
+                    start = Some(Point(y, x))
                 }
-                // SAFETY: see Pipe
-                map[y][x] = unsafe { transmute(chr) };
-            })
+                map[y][x] = unsafe { transmute(chr) }
+            }
         });
-    (map, start)
+    (map, start.unwrap())
 }
 
 impl Direction {
@@ -161,18 +159,26 @@ pub fn part_two((map, start_pos): &(Map, Point)) -> usize {
     #[cfg(not(debug_assertions))]
     const MAX_X: usize = MAP_DIMENSIONS;
 
-    const WALK_HALF: [Pipe; 3] = [Pipe::UpDown, Pipe::DownLeft, Pipe::DownRight];
-
     let mut counted_squares = 0;
     let mut edges = Vec::with_capacity(MAP_DIMENSIONS);
-    edges.push(*start_pos);
+    edges.push((*start_pos, false));
     // found in part 1
     #[cfg(debug_assertions)]
     let (mut cur_dir, mut cur_pos) = (Direction::Down, *start_pos);
     #[cfg(not(debug_assertions))]
     let (mut cur_dir, mut cur_pos) = (Direction::Left, *start_pos);
     while let Some((d, p)) = cur_dir.step(&cur_pos, &map) {
-        edges.push(p);
+        edges.push((
+            p,
+            match map[p.0][p.1] {
+                // Your choices here are:
+                // Vertical downward OR vertical upward; the pipe is always a match
+                // It's important to know your START position though, if that's
+                // part of your selection,
+                Pipe::UpDown | Pipe::DownLeft | Pipe::DownRight => true,
+                _ => false,
+            },
+        ));
         cur_pos = p;
         cur_dir = d;
     }
@@ -183,27 +189,18 @@ pub fn part_two((map, start_pos): &(Map, Point)) -> usize {
     // - Being inside means crossing the edge an odd number of times
     // - You can't cross an edge if it's in the ray's direction
     // - Edge points do not count as inside
-    //
-    // For visualization of the map, comment out the print statements
-    // Anything that is part of the loop is marked ░
-    // Any junk tiles are █
-    // And ╳ marks the spot for possible nest tiles
     for y in 0..MAP_DIMENSIONS {
         let mut inside = false;
         for x in 0..MAX_X {
-            if edges.contains(&Point(y, x)) {
-                // print!("░");
-                if WALK_HALF.contains(&map[y][x]) {
-                    inside = !inside;
-                }
-            } else if inside {
-                // print!("╳");
-                counted_squares += 1;
-            } // else {
-              // print!("█");
-              // }
+            edges
+                .iter()
+                .find(|(edge, _)| Point(y, x).eq(edge))
+                .map(|(_, flip)| {
+                    flip.then(|| inside = !inside);
+                })
+                .is_none()
+                .then(|| inside.then(|| counted_squares += 1));
         }
-        // println!("");
     }
     counted_squares
 }
