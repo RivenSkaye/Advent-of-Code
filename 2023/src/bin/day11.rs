@@ -96,6 +96,8 @@ pub fn part_one(points: &[Point]) -> usize {
         .iter()
         .zip(1..)
         .fold(0, |last, (point, next)| {
+            // One line becomes two; we need to add only 1 to make that happen.
+            // The original line is kept
             last + (next..len).fold(0, |l, i| l + points[i].distance::<1>(point))
         })
 }
@@ -106,6 +108,8 @@ pub fn part_two(points: &[Point]) -> usize {
         .iter()
         .zip(1..)
         .fold(0, |last, (point, next)| {
+            // One line becomes a million, we need to add only 999999 to make that number.
+            // The original line is kept
             last + (next..len).fold(0, |l, i| l + points[i].distance::<999999>(point))
         })
 }
