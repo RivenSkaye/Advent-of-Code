@@ -20,10 +20,22 @@ pub struct Point(usize, usize, usize, usize);
 impl Point {
     /// This is all about manhattan distances
     pub fn distance<const EXPANSION: usize>(&self, other: &Self) -> usize {
-        let sx = self.1 + (self.3 * EXPANSION);
-        let sy = self.0 + (self.2 * EXPANSION);
-        let ox = other.1 + (other.3 * EXPANSION);
-        let oy = other.0 + (other.2 * EXPANSION);
+        let sx = match self.3 {
+            0 => self.1,
+            _ => self.1 + (self.3 * EXPANSION),
+        };
+        let sy = match self.2 {
+            0 => self.0,
+            _ => self.0 + (self.2 * EXPANSION),
+        };
+        let ox = match other.3 {
+            0 => other.1,
+            _ => other.1 + (other.3 * EXPANSION),
+        };
+        let oy = match other.2 {
+            0 => other.0,
+            _ => other.0 + (other.2 * EXPANSION),
+        };
         sx.abs_diff(ox) + sy.abs_diff(oy)
     }
 }
