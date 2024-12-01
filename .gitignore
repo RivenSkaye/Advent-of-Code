@@ -11,3 +11,4 @@ Cargo.lock
 **/*.patch
 **/*.log
 nox.rs
+**/.zig-cache/
