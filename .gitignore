@@ -12,3 +12,4 @@ Cargo.lock
 **/*.log
 nox.rs
 **/.zig-cache/
+**/.zig-out/
