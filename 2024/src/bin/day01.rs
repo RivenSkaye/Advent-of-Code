@@ -8,8 +8,8 @@ static GLOBAL: MiMalloc = MiMalloc;
 use aoc2024::common;
 
 pub fn parse(input: &[u8]) -> (Vec<usize>, Vec<usize>) {
-    let mut left = Vec::<_>::new();
-    let mut right = Vec::<_>::new();
+    let mut left = Vec::<_>::with_capacity(input.len());
+    let mut right = Vec::<_>::with_capacity(input.len());
     for [l, r] in input
         .split(|chr| chr.is_ascii_whitespace())
         .filter(|word| word.len() > 0)
@@ -24,24 +24,22 @@ pub fn parse(input: &[u8]) -> (Vec<usize>, Vec<usize>) {
 }
 
 pub fn part_one(left: &Vec<usize>, right: &Vec<usize>) -> usize {
-    left.iter()
-        .zip(right.iter())
-        .map(|(&ln, &rn)| ln.abs_diff(rn) as usize)
+    left.into_iter()
+        .zip(right.into_iter())
+        .map(|(ln, &rn)| ln.abs_diff(rn) as usize)
         .sum()
 }
 
 pub fn part_two(left: &Vec<usize>, right: &Vec<usize>) -> usize {
     let mut last = usize::MAX;
     let mut mem = 0;
-    left.iter()
-        .map(|&num| {
-            if last != num {
-                mem = right.iter().filter(|n| num.eq(n)).count() * num;
-                last = num;
-            }
-            mem
-        })
-        .sum()
+    left.into_iter().fold(0, |prev, num| {
+        if last.ne(num) {
+            mem = right.into_iter().filter(|n| num.eq(n)).count() * num;
+            last = *num;
+        }
+        mem + prev
+    })
 }
 
 pub fn main() {
