@@ -79,7 +79,7 @@ pub fn p2_safe(data: &Vec<Vec<usize>>) -> usize {
                 let mut not_cur = line.clone();
                 not_cur.remove(fail - 1);
                 if check_line(&not_cur) > 0 {
-                    safe -= 1;
+                    unsafe { safe = safe.unchecked_sub(1) }
                 }
             }
         }
