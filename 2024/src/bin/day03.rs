@@ -3,15 +3,13 @@ extern crate test;
 use aoc2024::common;
 
 #[inline(always)]
-fn stoi_split(s: &[u8]) -> (usize, usize) {
+fn stoi_split_mul(s: &[u8]) -> usize {
     let mut s_iter = s.iter();
-    (
-        s_iter
-            .by_ref()
-            .take_while(|c| b','.ne(c))
-            .fold(0, |i, c| (10 * i) + (c - b'0') as usize),
-        s_iter.fold(0, |i, c| (10 * i) + (c - b'0') as usize),
-    )
+    s_iter
+        .by_ref()
+        .take_while(|c| b','.ne(c))
+        .fold(0, |i, c| (10 * i) + (c - b'0') as usize)
+        * s_iter.fold(0, |i, c| (10 * i) + (c - b'0') as usize)
 }
 
 fn part_one(data: &[u8]) -> usize {
@@ -39,22 +37,19 @@ fn part_one(data: &[u8]) -> usize {
                     continue 'outer;
                 }
                 comma = true;
+                idx += 1;
+                continue;
             }
-            if !b"1234567890,".contains(&data[idx]) {
+            if !b"1234567890".contains(&data[idx]) {
                 idx += 1;
                 continue 'outer;
             }
             idx += 1;
         }
-        if !comma {
+        if !comma || idx - start > 8 {
             continue;
         }
-        // The text clearly states that all numerics are one to three digits, plus the comma that's 7 max
-        if idx - start > 8 {
-            continue;
-        }
-        let (a, b) = stoi_split(&data[start..idx]);
-        total += a * b;
+        total += stoi_split_mul(&data[start..idx]);
         idx += 1;
     }
     total
@@ -95,27 +90,23 @@ pub fn part_two(data: &[u8]) -> usize {
         let start = idx;
         let mut comma = false;
         while idx < data.len() && data[idx] != b')' {
-            if data[idx] == b',' {
+            idx += 1;
+            if data[idx - 1] == b',' {
                 if comma {
                     continue 'outer;
                 }
                 comma = true;
+                continue;
             }
-            if !b"1234567890,".contains(&data[idx]) {
+            if !b"1234567890".contains(&data[idx - 1]) {
                 idx += 1;
                 continue 'outer;
             }
-            idx += 1;
         }
-        if !comma {
+        if !comma || idx - start > 8 {
             continue;
         }
-        // The text clearly states that all numerics are one to three digits, plus the comma that's 7 max
-        if idx - start > 7 {
-            continue;
-        }
-        let (a, b) = stoi_split(&data[start..idx]);
-        total += a * b;
+        total += stoi_split_mul(&data[start..idx]);
         idx += 1;
     }
     total
