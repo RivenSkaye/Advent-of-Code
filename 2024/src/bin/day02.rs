@@ -44,7 +44,7 @@ pub fn part_one(data: &Vec<Vec<usize>>) -> usize {
 }
 
 pub fn p2_safe(data: &Vec<Vec<usize>>) -> usize {
-    let mut safe = 0;
+    let mut safe = data.len();
     fn check_line(line: &Vec<usize>) -> usize {
         // bounds check once - saves 2ms!
         assert!(line.len() > 3);
@@ -79,11 +79,10 @@ pub fn p2_safe(data: &Vec<Vec<usize>>) -> usize {
                 let mut not_cur = line.clone();
                 not_cur.remove(fail - 1);
                 if check_line(&not_cur) > 0 {
-                    safe -= 1
+                    safe -= 1;
                 }
             }
         }
-        safe += 1;
     }
     safe
 }
