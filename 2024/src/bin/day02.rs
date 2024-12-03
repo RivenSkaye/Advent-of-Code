@@ -45,9 +45,8 @@ pub fn part_one(data: &Vec<Vec<usize>>) -> usize {
 
 pub fn p2_safe(data: &Vec<Vec<usize>>) -> usize {
     let mut safe = data.len();
+    #[inline(always)]
     fn check_line(line: &Vec<usize>) -> usize {
-        // bounds check once - saves 2ms!
-        assert!(line.len() > 3);
         // gracefully stolen from kageru
         let go_up = [line[0] < line[1], line[1] < line[2], line[2] < line[3]]
             .into_iter()
@@ -71,6 +70,10 @@ pub fn p2_safe(data: &Vec<Vec<usize>>) -> usize {
         0
     }
     for line in data {
+        if line.len() < 4 {
+            unsafe { safe = safe.unchecked_sub(1) };
+            continue;
+        }
         let fail = check_line(line);
         if fail > 0 {
             let mut not_next = line.clone();
