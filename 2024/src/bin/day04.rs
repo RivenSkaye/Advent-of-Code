@@ -18,10 +18,7 @@ pub fn parse(input: &[u8]) -> usize {
 
 pub fn part_one(data: &[u8], jump: usize) -> usize {
     let mut found = 0;
-    for idx in 0.. {
-        if idx == data.len() {
-            break;
-        }
+    for idx in 0..data.len() {
         // We only start searching from X to prevent false positives
         if b'X' != data[idx] {
             continue;
@@ -197,7 +194,7 @@ mod aoc_benching {
     #[bench]
     fn part1bench(b: &mut test::Bencher) {
         let input = common::read_file::<4>();
-        let parsed = parse(&input);
+        let parsed = input.iter().zip(1..).find(|(c, _)| b'\n'.eq(c)).unwrap().1;
         b.iter(|| {
             assert_eq!(
                 part_one(test::black_box(&input), test::black_box(parsed)),
