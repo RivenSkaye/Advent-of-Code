@@ -36,28 +36,42 @@ pub fn part_one(data: &[u8], jump: usize) -> usize {
         }
         // Okay we have an X still, so let's do directional searches.
         // straight down:
-        if idx + (3 * jump) < data.len() {
-            let cmp = [
+        if idx + (3 * jump) < data.len()
+            && ([
                 data[idx],
                 data[idx + jump],
                 data[idx + (2 * jump)],
                 data[idx + (3 * jump)],
-            ];
-            if cmp == *XMAS || cmp == *SAMX {
-                found += 1;
-            }
+            ]
+            .eq(XMAS)
+                || [
+                    data[idx],
+                    data[idx + jump],
+                    data[idx + (2 * jump)],
+                    data[idx + (3 * jump)],
+                ]
+                .eq(SAMX))
+        {
+            found += 1;
         }
         // straight up:
-        if idx >= (3 * jump) {
-            let cmp = [
+        if idx >= (3 * jump)
+            && ([
                 data[idx],
                 data[idx - jump],
                 data[idx - (2 * jump)],
                 data[idx - (3 * jump)],
-            ];
-            if cmp == *XMAS || cmp == *SAMX {
-                found += 1;
-            }
+            ]
+            .eq(XMAS)
+                || [
+                    data[idx],
+                    data[idx - jump],
+                    data[idx - (2 * jump)],
+                    data[idx - (3 * jump)],
+                ]
+                .eq(SAMX))
+        {
+            found += 1;
         }
         // up-left:
         if idx >= (3 * (jump + 1))
