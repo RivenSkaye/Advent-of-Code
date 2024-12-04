@@ -22,7 +22,10 @@ pub fn parse(input: &[u8]) -> usize {
 
 pub fn part_one(data: &[u8], jump: usize) -> usize {
     let mut found = 0;
-    for idx in 0..data.len() {
+    for idx in 0.. {
+        if idx == data.len() {
+            break;
+        }
         // We only start searching from X to prevent false positives
         if b'X' != data[idx] {
             continue;
@@ -154,8 +157,68 @@ pub fn part_one(data: &[u8], jump: usize) -> usize {
     found
 }
 
+pub fn part_two(data: &[u8], jump: usize) -> usize {
+    let mut found = 0;
+    for idx in (jump + 1).. {
+        if idx + (jump + 1) >= data.len() {
+            break;
+        }
+        if b'A' != data[idx] {
+            continue;
+        }
+        // match top-left, bottom-right, top-right, bottom-left
+        let cmp = [
+            data[idx - (jump + 1)],
+            data[idx + (jump + 1)],
+            data[idx - (jump - 1)],
+            data[idx + (jump - 1)],
+        ];
+        if cmp.eq(b"MSMS") || cmp.eq(b"MSSM") || cmp.eq(b"SMSM") || cmp.eq(b"SMMS") {
+            found += 1
+        }
+    }
+    found
+}
+
 pub fn main() {
     let data = common::read_file::<4>();
     let parsed = parse(&data);
     println!("{}", part_one(&data, parsed));
+    println!("{}", part_two(&data, parsed));
+}
+
+#[cfg(test)]
+mod aoc_benching {
+    use super::*;
+
+    #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = common::read_file::<4>();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(parse(test::black_box(&input)), parsed))
+    }
+
+    #[bench]
+    fn part1bench(b: &mut test::Bencher) {
+        let input = common::read_file::<4>();
+        let parsed = parse(&input);
+        b.iter(|| {
+            assert_eq!(
+                part_one(test::black_box(&input), test::black_box(parsed)),
+                2414
+            )
+        })
+    }
+
+    #[bench]
+    fn part2bench(b: &mut test::Bencher) {
+        let input = common::read_file::<4>();
+        let parsed = parse(&input);
+        b.iter(|| {
+            assert_eq!(
+                part_two(test::black_box(&input), test::black_box(parsed)),
+                1871
+            )
+        })
+    }
 }
