@@ -157,7 +157,7 @@ pub fn part_two(data: &[u8], jump: usize) -> usize {
     let mut found = 0;
     for idx in (jump + 1).. {
         if idx + (jump + 1) >= data.len() {
-            break;
+            return found;
         }
         if b'A' != data[idx] {
             continue;
@@ -173,7 +173,7 @@ pub fn part_two(data: &[u8], jump: usize) -> usize {
             found += 1
         }
     }
-    found
+    unreachable!()
 }
 
 pub fn main() {
