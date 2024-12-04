@@ -11,13 +11,9 @@ const XMAS: &[u8; 4] = b"XMAS";
 const SAMX: &[u8; 4] = b"SAMX";
 
 /// Our parser today just tells us what jump to make to skip over a line.
+/// Oh and inlining it is somehow slower on the benchmarks
 pub fn parse(input: &[u8]) -> usize {
-    for (chr, idx) in input.iter().zip(1..) {
-        if b'\n'.eq(chr) {
-            return idx;
-        }
-    }
-    unreachable!()
+    input.iter().zip(1..).find(|(c, _)| b'\n'.eq(c)).unwrap().1
 }
 
 pub fn part_one(data: &[u8], jump: usize) -> usize {
@@ -40,42 +36,28 @@ pub fn part_one(data: &[u8], jump: usize) -> usize {
         }
         // Okay we have an X still, so let's do directional searches.
         // straight down:
-        if idx + (3 * jump) < data.len()
-            && ([
+        if idx + (3 * jump) < data.len() {
+            let cmp = [
                 data[idx],
                 data[idx + jump],
                 data[idx + (2 * jump)],
                 data[idx + (3 * jump)],
-            ]
-            .eq(XMAS)
-                || [
-                    data[idx],
-                    data[idx + jump],
-                    data[idx + (2 * jump)],
-                    data[idx + (3 * jump)],
-                ]
-                .eq(SAMX))
-        {
-            found += 1;
+            ];
+            if cmp == *XMAS || cmp == *SAMX {
+                found += 1;
+            }
         }
         // straight up:
-        if idx >= (3 * jump)
-            && ([
+        if idx >= (3 * jump) {
+            let cmp = [
                 data[idx],
                 data[idx - jump],
                 data[idx - (2 * jump)],
                 data[idx - (3 * jump)],
-            ]
-            .eq(XMAS)
-                || [
-                    data[idx],
-                    data[idx - jump],
-                    data[idx - (2 * jump)],
-                    data[idx - (3 * jump)],
-                ]
-                .eq(SAMX))
-        {
-            found += 1;
+            ];
+            if cmp == *XMAS || cmp == *SAMX {
+                found += 1;
+            }
         }
         // up-left:
         if idx >= (3 * (jump + 1))
