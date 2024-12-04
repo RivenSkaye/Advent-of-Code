@@ -32,7 +32,7 @@ pub fn part_one(data: &[u8], jump: usize) -> usize {
             found += 1;
         }
         // horizontal search backward
-        if idx > 3 && &data[(idx - 4)..idx] == SAMX {
+        if idx > 3 && &data[(idx - 3)..=idx] == SAMX {
             found += 1;
         }
         // Okay we have an X still, so let's do directional searches.
