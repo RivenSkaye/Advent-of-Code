@@ -1,4 +1,4 @@
-#![feature(test)]
+#![feature(cow_is_borrowed, test)]
 extern crate test;
 
 use std::{borrow::Cow, collections::HashSet, io::BufRead};
@@ -67,19 +67,19 @@ pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> us
     prints
         .iter()
         .filter_map(|job| {
-            let mut j2 = Cow::from(job);
-            let mut fixed = false;
+            let mut j2 = Cow::Borrowed(job);
             loop {
                 let res = check_job(failures, &j2);
                 if let Err(err) = res {
-                    fixed = true;
                     let (a, b) = (
                         j2.iter().position(|e| err.0.eq(e)).unwrap(),
                         j2.iter().position(|e| err.1.eq(e)).unwrap(),
                     );
                     j2.to_mut().swap(a, b);
-                } else if fixed {
+                } else if j2.is_owned() {
                     return res.ok();
+                } else {
+                    return None;
                 }
             }
         })
