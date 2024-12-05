@@ -1,7 +1,7 @@
 #![feature(cow_is_borrowed, test)]
 extern crate test;
 
-use std::{borrow::Cow, collections::HashSet, io::BufRead};
+use std::{borrow::Cow, io::BufRead};
 
 use mimalloc::MiMalloc;
 #[global_allocator]
@@ -9,7 +9,7 @@ static GLOBAL: MiMalloc = MiMalloc;
 
 use aoc2024::common;
 
-pub fn parse(input: &[u8]) -> (HashSet<(usize, usize)>, Vec<Vec<usize>>) {
+pub fn parse(input: &[u8]) -> (Vec<(usize, usize)>, Vec<Vec<usize>>) {
     let mut line_iter = input.lines();
     let failures = line_iter
         .by_ref()
@@ -39,7 +39,7 @@ pub fn parse(input: &[u8]) -> (HashSet<(usize, usize)>, Vec<Vec<usize>>) {
 }
 
 #[inline]
-fn check_job(failures: &HashSet<(usize, usize)>, job: &[usize]) -> Result<usize, (usize, usize)> {
+fn check_job(failures: &[(usize, usize)], job: &[usize]) -> Result<usize, (usize, usize)> {
     let mut printed = Vec::with_capacity(job.len());
     let middle = job.len() / 2; // integer division truncates
     for page in job {
@@ -56,14 +56,14 @@ fn check_job(failures: &HashSet<(usize, usize)>, job: &[usize]) -> Result<usize,
     Ok(job[middle])
 }
 
-pub fn part_one(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> usize {
+pub fn part_one(failures: &[(usize, usize)], prints: &[Vec<usize>]) -> usize {
     prints
         .iter()
         .filter_map(|job| check_job(failures, job).ok())
         .sum()
 }
 
-pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> usize {
+pub fn part_two(failures: &[(usize, usize)], prints: &[Vec<usize>]) -> usize {
     prints
         .iter()
         .filter_map(|job| {
