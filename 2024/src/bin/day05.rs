@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use std::{collections::HashSet, io::BufRead};
+use std::{borrow::Cow, collections::HashSet, io::BufRead};
 
 use mimalloc::MiMalloc;
 #[global_allocator]
@@ -67,24 +67,21 @@ pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> us
     prints
         .iter()
         .filter_map(|job| {
-            check_job(failures, job)
-                .map_err(|err| {
-                    let mut j2 = job.clone();
+            let mut j2 = Cow::from(job);
+            let mut res = None;
+            loop {
+                if let Some(err) = check_job(failures, &j2).err() {
                     let (a, b) = (
                         j2.iter().position(|e| err.0.eq(e)).unwrap(),
                         j2.iter().position(|e| err.1.eq(e)).unwrap(),
                     );
-                    j2.swap(a, b);
-                    while let Some(err) = check_job(failures, &j2).err() {
-                        let (a, b) = (
-                            j2.iter().position(|e| err.0.eq(e)).unwrap(),
-                            j2.iter().position(|e| err.1.eq(e)).unwrap(),
-                        );
-                        j2.swap(a, b);
-                    }
-                    j2[j2.len() / 2]
-                })
-                .err()
+                    j2.to_mut().swap(a, b);
+                    res = Some(j2[j2.len() / 2]);
+                } else {
+                    break;
+                }
+            }
+            res
         })
         .sum()
 }
