@@ -9,6 +9,7 @@ static GLOBAL: MiMalloc = MiMalloc;
 
 use aoc2024::common;
 
+#[inline(always)]
 pub fn parse(input: &[u8]) -> (Vec<(usize, usize)>, Vec<Vec<usize>>) {
     let mut line_iter = input.lines();
     let failures = line_iter
@@ -38,7 +39,7 @@ pub fn parse(input: &[u8]) -> (Vec<(usize, usize)>, Vec<Vec<usize>>) {
     (failures, prints)
 }
 
-#[inline]
+#[inline(always)]
 fn check_job(failures: &[(usize, usize)], job: &[usize]) -> Result<usize, (usize, usize)> {
     let mut printed = Vec::with_capacity(job.len());
     let middle = job.len() / 2; // integer division truncates
@@ -56,6 +57,7 @@ fn check_job(failures: &[(usize, usize)], job: &[usize]) -> Result<usize, (usize
     Ok(job[middle])
 }
 
+#[inline(always)]
 pub fn part_one(failures: &[(usize, usize)], prints: &[Vec<usize>]) -> usize {
     prints
         .iter()
@@ -63,6 +65,7 @@ pub fn part_one(failures: &[(usize, usize)], prints: &[Vec<usize>]) -> usize {
         .sum()
 }
 
+#[inline(always)]
 pub fn part_two(failures: &[(usize, usize)], prints: &[Vec<usize>]) -> usize {
     prints
         .iter()
@@ -110,10 +113,7 @@ mod aoc_benching {
         let parsed = parse(&input);
         b.iter(|| {
             assert_eq!(
-                part_one(
-                    test::black_box(&parsed.0),
-                    test::black_box(&parsed.1.clone())
-                ),
+                part_one(test::black_box(&parsed.0), test::black_box(&parsed.1)),
                 5108
             )
         })
