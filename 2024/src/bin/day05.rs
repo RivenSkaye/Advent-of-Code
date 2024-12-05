@@ -68,20 +68,20 @@ pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> us
         .iter()
         .filter_map(|job| {
             let mut j2 = Cow::from(job);
-            let mut res = None;
+            let mut fixed = false;
             loop {
-                if let Some(err) = check_job(failures, &j2).err() {
+                let res = check_job(failures, &j2);
+                if let Err(err) = res {
+                    fixed = true;
                     let (a, b) = (
                         j2.iter().position(|e| err.0.eq(e)).unwrap(),
                         j2.iter().position(|e| err.1.eq(e)).unwrap(),
                     );
                     j2.to_mut().swap(a, b);
-                    res = Some(j2[j2.len() / 2]);
-                } else {
-                    break;
+                } else if fixed {
+                    return res.ok();
                 }
             }
-            res
         })
         .sum()
 }
