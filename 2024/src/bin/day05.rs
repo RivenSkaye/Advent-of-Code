@@ -63,18 +63,28 @@ pub fn part_one(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> us
         .sum()
 }
 
-pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &mut [Vec<usize>]) -> usize {
+pub fn part_two(failures: &HashSet<(usize, usize)>, prints: &[Vec<usize>]) -> usize {
     prints
-        .iter_mut()
+        .iter()
         .filter_map(|job| {
-            let mut res = None;
-            while let Some(off) = check_job(failures, job).err() {
-                let a = job.iter().position(|e| off.0.eq(e)).unwrap();
-                let b = job.iter().position(|e| off.1.eq(e)).unwrap();
-                job.swap(a, b);
-                res = Some(job[job.len() / 2]);
-            }
-            res
+            check_job(failures, job)
+                .map_err(|err| {
+                    let mut j2 = job.clone();
+                    let (a, b) = (
+                        j2.iter().position(|e| err.0.eq(e)).unwrap(),
+                        j2.iter().position(|e| err.1.eq(e)).unwrap(),
+                    );
+                    j2.swap(a, b);
+                    while let Some(err) = check_job(failures, &j2).err() {
+                        let (a, b) = (
+                            j2.iter().position(|e| err.0.eq(e)).unwrap(),
+                            j2.iter().position(|e| err.1.eq(e)).unwrap(),
+                        );
+                        j2.swap(a, b);
+                    }
+                    j2[j2.len() / 2]
+                })
+                .err()
         })
         .sum()
 }
@@ -118,21 +128,9 @@ mod aoc_benching {
         let parsed = parse(&input);
         b.iter(|| {
             assert_eq!(
-                part_two(
-                    test::black_box(&parsed.0),
-                    test::black_box(&mut parsed.1.clone())
-                ),
+                part_two(test::black_box(&parsed.0), test::black_box(&parsed.1)),
                 7380
             )
-        })
-    }
-
-    #[bench]
-    fn part2clone_diff(b: &mut test::Bencher) {
-        let input = common::read_file::<5>();
-        let parsed = parse(&input);
-        b.iter(|| {
-            assert_eq!(test::black_box(&mut parsed.1.clone()), &parsed.1);
         })
     }
 }
