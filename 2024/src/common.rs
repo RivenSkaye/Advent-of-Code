@@ -1,12 +1,12 @@
 #[cfg(debug_assertions)]
-const FILENAME: &str = "test_inputs";
+const DIRNAME: &str = "test_inputs";
 #[cfg(not(debug_assertions))]
-const FILENAME: &str = "inputs";
+const DIRNAME: &str = "inputs";
 
 #[inline(always)]
 pub fn read_file<const DAY: usize>() -> Vec<u8> {
-    println!("Reading `{FILENAME}`");
-    std::fs::read(format!("{FILENAME}/day{DAY:0>2}.txt"))
+    println!("Reading `{DIRNAME}`");
+    std::fs::read(format!("{DIRNAME}/day{DAY:0>2}.txt"))
         .unwrap()
         .trim_ascii()
         .iter()
@@ -16,8 +16,8 @@ pub fn read_file<const DAY: usize>() -> Vec<u8> {
 
 #[inline(always)]
 pub fn read_str<const DAY: usize>() -> String {
-    println!("Reading `{FILENAME}`");
-    std::fs::read_to_string(format!("{FILENAME}/day{DAY:0>2}.txt"))
+    println!("Reading `{DIRNAME}`");
+    std::fs::read_to_string(format!("{DIRNAME}/day{DAY:0>2}.txt"))
         .unwrap()
         .replace("\r", "")
 }
