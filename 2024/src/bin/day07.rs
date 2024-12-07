@@ -11,68 +11,70 @@ pub fn parse(input: &[u8]) -> Vec<(usize, Vec<usize>)> {
     input
         .split(|c| b'\n'.eq(c))
         .map(|line| {
-            let parts = line.split_once(|c| b':'.eq(c)).unwrap();
-            (
-                common::stoi(parts.0),
-                parts
-                    .1
-                    .split(|c| c.is_ascii_whitespace())
-                    .filter(|x| x.len() > 0)
-                    .map(common::stoi)
-                    .collect(),
-            )
+            line.split_once(|c| b':'.eq(c))
+                .map(|(a, b)| {
+                    (
+                        common::stoi(a),
+                        b.split(|c| c.is_ascii_whitespace())
+                            .filter(|x| x.len() > 0)
+                            .map(common::stoi)
+                            .collect(),
+                    )
+                })
+                .unwrap()
         })
         .collect()
 }
 
-#[inline(always)]
-fn try_calcs(res: usize, bits: &[usize]) -> bool {
-    (0..(1 << bits.len() - 1)).any(|op| {
-        bits[1..]
-            .iter()
-            .enumerate()
-            .fold(bits[0], |curr, (idx, &next)| match (op >> idx) & 1 {
-                1 => curr * next,
-                _ => curr + next,
-            })
-            == res
-    })
-}
-
-pub fn part_one(parsed: &[(usize, Vec<usize>)]) -> usize {
-    parsed
-        .iter()
-        .filter_map(|(res, bits)| try_calcs(*res, bits).then_some(res))
-        .sum()
-}
+const OPS1: [fn(usize, usize) -> usize; 2] = [|a, b| a + b, |a, b| a * b];
+const OPS2: [fn(usize, usize) -> usize; 3] = [
+    |a, b| a * b,
+    |a, b| a + b,
+    |a, b| a * 10usize.pow(b.ilog10() + 1) + b,
+];
 
 #[inline(always)]
-fn try_calcs_recursive<F>(res: usize, curr: usize, bits: &[usize], ops: &[F]) -> bool
-where
-    F: Fn(usize, usize) -> usize,
-{
+fn try_calcs_p1(res: usize, curr: usize, bits: &[usize]) -> bool {
     match bits.len() {
         0 => curr == res,
         _ => {
             if curr > res {
                 return false;
             }
-            ops.iter()
-                .any(|op| try_calcs_recursive(res, op(curr, bits[0]), &bits[1..], ops))
+            OPS1.iter()
+                .any(|op| try_calcs_p1(res, op(curr, bits[0]), &bits[1..]))
+        }
+    }
+}
+
+pub fn part_one(parsed: &[(usize, Vec<usize>)]) -> usize {
+    parsed
+        .iter()
+        .filter_map(|(res, bits)| try_calcs_p1(*res, bits[0], &bits[1..]).then_some(res))
+        .sum()
+}
+
+#[inline(always)]
+fn try_calcs_p2(res: usize, curr: usize, bits: &[usize]) -> bool {
+    match bits.len() {
+        0 => curr == res,
+        _ => {
+            if curr > res {
+                return false;
+            }
+            OPS2.iter()
+                .any(|op| try_calcs_p2(res, op(curr, bits[0]), &bits[1..]))
         }
     }
 }
 
 pub fn part_two(parsed: &[(usize, Vec<usize>)]) -> usize {
-    const OPS: [fn(usize, usize) -> usize; 3] = [
-        |a, b| a * b,
-        |a, b| a + b,
-        |a, b| a * 10usize.pow(b.ilog10() + 1) + b,
-    ];
     parsed
         .iter()
         .filter_map(|(res, bits)| {
-            try_calcs_recursive(*res, bits[0], &bits[1..], &OPS).then_some(res)
+            try_calcs_p1(*res, bits[0], &bits[1..])
+                .then_some(res)
+                .or_else(|| try_calcs_p2(*res, bits[0], &bits[1..]).then_some(res))
         })
         .sum()
 }
