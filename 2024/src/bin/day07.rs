@@ -51,14 +51,16 @@ fn try_calcs_recursive<F>(res: usize, curr: usize, bits: &[usize], ops: &[F]) ->
 where
     F: Fn(usize, usize) -> usize,
 {
-    if curr > res {
-        return false;
+    match bits.len() {
+        0 => curr == res,
+        _ => {
+            if curr > res {
+                return false;
+            }
+            ops.iter()
+                .any(|op| try_calcs_recursive(res, op(curr, bits[0]), &bits[1..], ops))
+        }
     }
-    if bits.len() == 0 {
-        return res == curr;
-    }
-    ops.iter()
-        .any(|op| try_calcs_recursive(res, op(curr, bits[0]), &bits[1..], ops))
 }
 
 pub fn part_two(parsed: &[(usize, Vec<usize>)]) -> usize {
