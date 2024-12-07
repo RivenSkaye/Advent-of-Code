@@ -116,7 +116,6 @@ pub fn part_one(grid: &mut Grid, mut position: usize) -> usize {
 }
 
 pub fn part_two(grid: &mut Grid, start_position: usize) -> usize {
-    let mut moves = HashSet::with_capacity(grid.inner.len());
     let mut dir = Direction::UP;
     let mut position = start_position;
     let mut checks = HashSet::with_capacity(5000);
@@ -125,6 +124,7 @@ pub fn part_two(grid: &mut Grid, start_position: usize) -> usize {
         dir = step.1;
         checks.insert(step.0);
     }
+    let mut moves = HashSet::with_capacity(checks.len() * 2);
     checks
         .iter()
         .filter(|&&i| {
