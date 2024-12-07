@@ -46,23 +46,31 @@ pub fn part_one(parsed: &[(usize, Vec<usize>)]) -> usize {
         .sum()
 }
 
+#[inline(always)]
+fn try_calcs_recursive<F>(res: usize, curr: usize, bits: &[usize], ops: &[F]) -> bool
+where
+    F: Fn(usize, usize) -> usize,
+{
+    if curr > res {
+        return false;
+    }
+    if bits.len() == 0 {
+        return res == curr;
+    }
+    ops.iter()
+        .any(|op| try_calcs_recursive(res, op(curr, bits[0]), &bits[1..], ops))
+}
+
 pub fn part_two(parsed: &[(usize, Vec<usize>)]) -> usize {
+    const OPS: [fn(usize, usize) -> usize; 3] = [
+        |a, b| a * b,
+        |a, b| a + b,
+        |a, b| a * 10usize.pow(b.ilog10() + 1) + b,
+    ];
     parsed
         .iter()
         .filter_map(|(res, bits)| {
-            (0..(3usize.pow(bits.len() as u32) - 1))
-                .any(|op| {
-                    bits[1..]
-                        .iter()
-                        .enumerate()
-                        .fold(bits[0], |curr, (idx, &next)| match ((op >> idx) & 3) % 3 {
-                            1 => curr * next,
-                            0 => curr + next,
-                            _ => curr * 10usize.pow(next.ilog10() + 1) + next,
-                        })
-                        .eq(res)
-                })
-                .then_some(res)
+            try_calcs_recursive(*res, bits[0], &bits[1..], &OPS).then_some(res)
         })
         .sum()
 }
@@ -91,17 +99,10 @@ mod aoc_benching {
         b.iter(|| assert_eq!(part_one(test::black_box(&parsed)), 1545311493300))
     }
 
-    /*
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
-        let input = common::read_file::<6>();
-        let pos = parse(&input);
-        let mut parsed = Grid::from(input);
-        b.iter(|| {
-            assert_eq!(
-                part_two(test::black_box(&mut parsed), test::black_box(pos.clone())),
-                1723
-            )
-        })
-    } */
+        let input = common::read_file::<7>();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 169122112716571))
+    }
 }
