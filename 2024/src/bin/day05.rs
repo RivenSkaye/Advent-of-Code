@@ -1,11 +1,11 @@
 #![feature(cow_is_borrowed, test)]
 extern crate test;
 
-use std::{borrow::Cow, io::BufRead};
-
 use mimalloc::MiMalloc;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
+
+use std::{borrow::Cow, io::BufRead};
 
 use aoc2024::common;
 
