@@ -101,7 +101,7 @@ impl Grid {
 }
 
 #[inline(always)]
-pub fn parse(input: &Vec<u8>) -> usize {
+pub fn parse(input: &[u8]) -> usize {
     input.iter().position(|u| b'^'.eq(u)).unwrap()
 }
 
