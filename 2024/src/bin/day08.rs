@@ -1,4 +1,4 @@
-#![feature(let_chains, test)]
+#![feature(test)]
 extern crate test;
 
 use std::collections::HashSet;
@@ -51,9 +51,10 @@ fn find_antinodes_p1(grid: &Grid, current: usize, container: &mut HashSet<usize>
     for (val, pos) in grid.inner[(current + 1)..].iter().zip((current + 1)..) {
         if label.eq(val) {
             let (xdist, ydist) = grid.distance(current, pos);
+            let nextx = grid.distance(0, pos).0;
             // note: we only need to check left/right because we only check spaces
             // later in the grid. Or for the 1D Vec, we only check higher indices
-            let xdir = if grid.distance(0, pos).0 < xpos {
+            let xdir = if nextx < xpos {
                 Direction::LEFT
             } else {
                 Direction::RIGHT
@@ -65,7 +66,7 @@ fn find_antinodes_p1(grid: &Grid, current: usize, container: &mut HashSet<usize>
                     if jmp <= current && (xpos + xdist) < grid.line_length {
                         container.insert(current - jmp);
                     }
-                    if (pos + jmp) < grid.inner.len() && xpos >= xdist {
+                    if (pos + jmp) < grid.inner.len() && nextx >= xdist {
                         container.insert(pos + jmp);
                     }
                 }
@@ -75,7 +76,7 @@ fn find_antinodes_p1(grid: &Grid, current: usize, container: &mut HashSet<usize>
                     if jmp <= current && xpos >= xdist {
                         container.insert(current - jmp);
                     }
-                    if (pos + jmp) < grid.inner.len() && (xpos + xdist) < grid.line_length {
+                    if (pos + jmp) < grid.inner.len() && (nextx + xdist) < grid.line_length {
                         container.insert(pos + jmp);
                     }
                 }
@@ -93,79 +94,49 @@ pub fn part_one(grid: &Grid) -> usize {
         }
         find_antinodes_p1(grid, pos, &mut container);
     }
-    for i in 0..grid.inner.len() {
-        if i % grid.line_length == 0 {
-            println!("")
-        }
-        print!(
-            "{}",
-            if container.contains(&i) && grid.inner[i] == b'.' {
-                String::from("#")
-            } else {
-                String::from_utf8_lossy(&grid.inner[i..=i]).into()
-            }
-        )
-    }
-    println!("\n{container:?}");
     container.len()
 }
 
 fn find_antinodes_p2(grid: &Grid, current: usize, container: &mut HashSet<usize>) {
     let label = grid.inner[current];
-    let xpos = grid.distance(0, current).0;
+    let (xpos, ypos) = grid.distance(0, current);
+    let max_y = grid.distance(0, grid.inner.len() - 1).1;
     for (val, pos) in grid.inner[(current + 1)..].iter().zip((current + 1)..) {
         if label.eq(val) {
+            container.insert(current);
+            container.insert(pos);
             let (xdist, ydist) = grid.distance(current, pos);
-            // note: we only need to check left/right because we only check spaces
-            // later in the grid. Or for the 1D Vec, we only check higher indices
-            let xdir = if pos % grid.line_length < xpos {
-                Direction::LEFT
+            let (nextx, nexty) = grid.distance(0, pos);
+            let (mut backx, mut backy) = (xdist, ydist);
+            let (mut fwrdx, mut fwrdy) = (xdist, ydist);
+            if nextx < xpos {
+                // next is down-left, so prev is up-right
+                while backx < (grid.line_length - xpos) && backy <= ypos {
+                    let jmp = (backy * grid.line_length) - backx;
+                    container.insert(current - jmp);
+                    backx += xdist;
+                    backy += ydist;
+                }
+                while fwrdx <= nextx && fwrdy <= (max_y - nexty) {
+                    let jmp = (fwrdy * grid.line_length) - fwrdx;
+                    container.insert(pos + jmp);
+                    fwrdx += xdist;
+                    fwrdy += ydist;
+                }
             } else {
-                Direction::RIGHT
-            };
-            let mut back = true;
-            let mut forward = true;
-            let mut jmpy = 0;
-            let mut jmpx = 0;
-            match xdir {
-                Direction::LEFT => {
-                    while back || forward {
-                        jmpy += ydist * grid.line_length;
-                        jmpx += xdist;
-                        let jmp = jmpy - jmpx;
-                        if back && jmp <= current && (grid.line_length % xpos) >= jmpx {
-                            container.insert(current - jmp);
-                        } else {
-                            back = false;
-                        }
-                        if forward && (pos + jmp) < grid.inner.len() && xpos >= jmpx {
-                            container.insert(pos + jmp);
-                        } else {
-                            forward = false;
-                        }
-                    }
+                // next is down-right, so prev is up-left
+                while backx <= xpos && backy <= ypos {
+                    let jmp = (backy * grid.line_length) + backx;
+                    container.insert(current - jmp);
+                    backx += xdist;
+                    backy += ydist;
                 }
-                Direction::RIGHT => {
-                    while back || forward {
-                        jmpy += ydist * grid.line_length;
-                        jmpx += xdist;
-                        let jmp = jmpy - jmpx;
-                        if back && jmp <= current && xpos >= jmpx {
-                            container.insert(current - jmp);
-                        } else {
-                            back = false;
-                        }
-                        if forward
-                            && (pos + jmp) < grid.inner.len()
-                            && (grid.line_length % xpos) >= jmpx
-                        {
-                            container.insert(pos + jmp);
-                        } else {
-                            forward = false;
-                        }
-                    }
+                while fwrdx < (grid.line_length - nextx) && fwrdy <= (max_y - nexty) {
+                    let jmp = (fwrdy * grid.line_length) + fwrdx;
+                    container.insert(pos + jmp);
+                    fwrdx += xdist;
+                    fwrdy += ydist;
                 }
-                _ => unreachable!(),
             }
         }
     }
@@ -180,20 +151,6 @@ pub fn part_two(grid: &Grid) -> usize {
         container.insert(pos);
         find_antinodes_p2(grid, pos, &mut container);
     }
-    for i in 0..grid.inner.len() {
-        if i % grid.line_length == 0 {
-            println!("")
-        }
-        print!(
-            "{}",
-            if container.contains(&i) && grid.inner[i] == b'.' {
-                String::from("#")
-            } else {
-                String::from_utf8_lossy(&grid.inner[i..=i]).into()
-            }
-        )
-    }
-    println!("");
     container.len()
 }
 
