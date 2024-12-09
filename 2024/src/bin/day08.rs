@@ -160,3 +160,33 @@ pub fn main() {
     println!("{}", part_one(&parsed));
     println!("{}", part_two(&parsed));
 }
+
+#[cfg(test)]
+mod aoc_benching {
+    use super::*;
+
+    #[bench]
+    fn parsebench(b: &mut test::Bencher) {
+        let input = common::read_file::<8>();
+        let parsed = Grid::from(input.as_slice());
+        b.iter(|| {
+            assert_eq!(
+                Grid::from(test::black_box(input.as_slice())).line_length,
+                parsed.line_length
+            )
+        })
+    }
+    #[bench]
+    fn part1bench(b: &mut test::Bencher) {
+        let input = common::read_file::<8>();
+        let parsed = Grid::from(input.as_slice());
+        b.iter(|| assert_eq!(part_one(test::black_box(&parsed)), 214))
+    }
+
+    #[bench]
+    fn part2bench(b: &mut test::Bencher) {
+        let input = common::read_file::<8>();
+        let parsed = Grid::from(input.as_slice());
+        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 809))
+    }
+}
