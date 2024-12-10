@@ -39,7 +39,7 @@ pub fn part_one(disk: &[usize], offset: usize) -> usize {
 }
 
 pub fn part_two(diskmap: &[usize], offset: usize) -> usize {
-    let mut lengths = Vec::with_capacity(diskmap.len() / 2);
+    let mut empty_lengths = Vec::with_capacity(diskmap.len() / 2);
     let mut file_lengths = vec![0; diskmap.iter().max().unwrap() + 1];
     let mut start = 0;
     let mut len = 0;
@@ -48,7 +48,7 @@ pub fn part_two(diskmap: &[usize], offset: usize) -> usize {
         if 0.lt(block) {
             file_lengths[*block] += 1;
             if len > 0 {
-                lengths.push((start, len));
+                empty_lengths.push((start, len));
                 start += len;
                 len = 0;
             }
@@ -59,28 +59,23 @@ pub fn part_two(diskmap: &[usize], offset: usize) -> usize {
     }
     let mut ordered = diskmap.to_vec();
     let mut idx = diskmap.len() - 1;
-    for (id, file) in file_lengths.iter().enumerate().rev() {
-        if let Some((empty_idx, mut first_empty, mut empty_len)) = lengths
+    for (id, file) in file_lengths.iter().enumerate().skip(2).rev() {
+        if let Some((empty_idx, first_empty, empty_len)) = empty_lengths
             .iter()
             .enumerate()
-            .find_map(|(e, (s, l))| (file.le(l) && (idx) > e).then_some((e, *s, *l)))
+            .find_map(|(e, (s, l))| (file.le(l) && idx.gt(s)).then_some((e, *s, *l)))
         {
             for i in 0..*file {
-                ordered.swap(idx - i, first_empty);
-                first_empty += 1;
-                empty_len -= 1;
+                ordered.swap(idx - i, first_empty + i);
             }
-            if empty_len > 0 {
-                lengths[empty_idx] = (first_empty, empty_len)
+            if empty_len > *file {
+                empty_lengths[empty_idx] = (first_empty + file, empty_len - file)
             } else {
-                lengths.remove(empty_idx);
+                empty_lengths.remove(empty_idx);
             }
-        }
-        if id == 1 {
-            break;
         }
         idx -= file;
-        while ordered[idx] == 0 || ordered[idx] >= id {
+        while ordered[idx] == 0 || ordered[idx] >= id && idx > 0 {
             idx -= 1;
         }
     }
@@ -119,11 +114,18 @@ mod aoc_benching {
             )
         })
     }
-    /*
+
     #[bench]
     fn part2bench(b: &mut test::Bencher) {
-        let input = common::read_file::<8>();
-        let parsed = Grid::from(input.as_slice());
-        b.iter(|| assert_eq!(part_two(test::black_box(&parsed)), 809))
-    }*/
+        let input = common::read_file::<9>();
+        let parsed = parse(&input);
+        let p1 = parsed.0.clone();
+        b.iter(|| {
+            assert_eq!(
+                part_two(test::black_box(&parsed.0), test::black_box(parsed.1)),
+                6265268809555
+            );
+            assert_eq!(p1, parsed.0)
+        })
+    }
 }
