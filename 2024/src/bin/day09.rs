@@ -63,7 +63,7 @@ pub fn part_two(diskmap: &[usize], offset: usize) -> usize {
         if let Some((empty_idx, mut first_empty, mut empty_len)) = lengths
             .iter()
             .enumerate()
-            .find_map(|(e, (s, l))| (file.le(l) && id > e).then_some((e, *s, *l)))
+            .find_map(|(e, (s, l))| (file.le(l) && (idx) > e).then_some((e, *s, *l)))
         {
             for i in 0..*file {
                 ordered.swap(idx - i, first_empty);
@@ -80,7 +80,7 @@ pub fn part_two(diskmap: &[usize], offset: usize) -> usize {
             break;
         }
         idx -= file;
-        while ordered[idx] == 0 || ordered[idx] > id {
+        while ordered[idx] == 0 || ordered[idx] >= id {
             idx -= 1;
         }
     }
