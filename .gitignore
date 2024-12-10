@@ -13,3 +13,4 @@ Cargo.lock
 nox.rs
 **/.zig-cache/
 **/.zig-out/
+.vscode/
