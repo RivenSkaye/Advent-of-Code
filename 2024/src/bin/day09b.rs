@@ -77,4 +77,5 @@ pub fn main() {
     let data = common::read_file::<9>();
     let (parsed, offset) = parse(&data);
     println!("{}", part_two(&parsed, offset));
+    // I'm getting a resultant checksum of 9514159291881. Which is apparently too high.
 }
