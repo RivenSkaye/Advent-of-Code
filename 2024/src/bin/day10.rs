@@ -70,6 +70,22 @@ pub fn part_one(grid: &Grid) -> usize {
             b'0'.eq(val).then(|| {
                 let mut ends = Vec::with_capacity(grid.inner.len());
                 walk_from(grid, idx, &mut ends);
+                ends.sort();
+                ends.dedup();
+                ends.len()
+            })
+        })
+        .sum()
+}
+
+pub fn part_two(grid: &Grid) -> usize {
+    grid.inner
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, val)| {
+            b'0'.eq(val).then(|| {
+                let mut ends = Vec::with_capacity(grid.inner.len());
+                walk_from(grid, idx, &mut ends);
                 ends.len()
             })
         })
@@ -80,4 +96,5 @@ pub fn main() {
     let input = common::read_file::<10>();
     let parsed = parse(&input);
     println!("{}", part_one(&parsed));
+    println!("{}", part_two(&parsed));
 }
