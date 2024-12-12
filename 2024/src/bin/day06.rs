@@ -78,20 +78,15 @@ impl Grid {
     }
 
     fn is_cycle(&self, mut current: usize, moves: &mut HashSet<usize>) -> bool {
-        /// Szudzik's elegant pairing function: http://szudzik.com/ElegantPairing.pdf
-        #[inline(always)]
-        fn _pair(curr: usize, dir: usize) -> usize {
-            curr * curr + curr + dir
-        }
         let mut dir = Direction::UP;
         while let Some((step, turned)) = self.step(current, dir) {
             // We left shift by 7 because Directions are never more than 118.
             // This shift ensures step > turned for the pairing function.
-            if moves.contains(&_pair(step << 7, turned as usize)) {
+            if moves.contains(&common::elegant_pair(step << 7, turned as usize)) {
                 moves.clear();
                 return true;
             }
-            moves.insert(_pair(step << 7, turned as usize));
+            moves.insert(common::elegant_pair(step << 7, turned as usize));
             dir = turned;
             current = step;
         }

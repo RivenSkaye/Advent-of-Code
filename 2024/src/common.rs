@@ -34,3 +34,11 @@ pub fn stosi(s: &[u8]) -> i64 {
         false => s.iter().fold(0, |i, c| (10 * i) + (c - b'0') as i64),
     }
 }
+
+/// Szudzik's elegant pairing function: http://szudzik.com/ElegantPairing.pdf
+#[inline(always)]
+pub fn elegant_pair(a: usize, b: usize) -> u128 {
+    let hi = a.max(b) as u128;
+    let lo = a.min(b) as u128;
+    hi * hi + hi + lo
+}
