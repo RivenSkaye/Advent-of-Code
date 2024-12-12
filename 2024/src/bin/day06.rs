@@ -82,11 +82,11 @@ impl Grid {
         while let Some((step, turned)) = self.step(current, dir) {
             // We left shift by 7 because Directions are never more than 118.
             // This shift ensures step > turned for the pairing function.
-            if moves.contains(&common::elegant_pair(step << 7, turned as usize)) {
+            if moves.contains(&(common::elegant_pair(step << 7, turned as usize) as usize)) {
                 moves.clear();
                 return true;
             }
-            moves.insert(common::elegant_pair(step << 7, turned as usize));
+            moves.insert(common::elegant_pair(step << 7, turned as usize) as usize);
             dir = turned;
             current = step;
         }
