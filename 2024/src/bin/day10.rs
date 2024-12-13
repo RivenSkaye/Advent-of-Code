@@ -1,8 +1,6 @@
 #![feature(vec_push_within_capacity, test)]
 extern crate test;
 
-use std::usize;
-
 use aoc2024::common;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
