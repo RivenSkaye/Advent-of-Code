@@ -104,8 +104,10 @@ pub fn part_two(grid: &Grid) -> usize {
         let mut area = 0;
         walk(grid, i, &mut area, &mut perimeters, &mut checked);
         let mut walls = 0;
+        // THe walk setup adds both separately so they're never in the same iteration
         for p in 0..perimeters.len() {
             let ((x, y), dir) = perimeters[p];
+            // Find vertical walls
             if (dir == Direction::UP || dir == Direction::DOWN)
                 && perimeters
                     .iter()
@@ -117,7 +119,9 @@ pub fn part_two(grid: &Grid) -> usize {
                     .is_none()
             {
                 walls += 1;
-            } else if (dir == Direction::LEFT || dir == Direction::RIGHT)
+            }
+            // Find horizontal walls
+            else if (dir == Direction::LEFT || dir == Direction::RIGHT)
                 && perimeters
                     .iter()
                     .find(|((other_x, other_y), other_dir)| {
