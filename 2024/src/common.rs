@@ -28,10 +28,10 @@ pub fn stoi(s: &[u8]) -> usize {
 }
 
 #[inline(always)]
-pub fn stosi(s: &[u8]) -> i64 {
+pub fn stosi(s: &[u8]) -> isize {
     match s[0] == b'-' {
-        true => s[1..].iter().fold(0, |i, c| (10 * i) - (c - b'0') as i64),
-        false => s.iter().fold(0, |i, c| (10 * i) + (c - b'0') as i64),
+        true => s[1..].iter().fold(0, |i, c| (10 * i) - (c - b'0') as isize),
+        false => s.iter().fold(0, |i, c| (10 * i) + (c - b'0') as isize),
     }
 }
 
