@@ -35,16 +35,15 @@ fn mash_buttons<const ERR: isize>(vars: &[(isize, isize, isize, isize, isize, is
             let divisor = ax * by - bx * ay;
             if divisor != 0 {
                 let a_divident = (px * by) - (py * bx);
-                let a_presses = ((a_divident / divisor) * divisor == a_divident)
-                    .then(|| a_divident / divisor)?;
+                // Thanks to FichteFoll for the optimization trick here
+                let a_presses = Some(a_divident / divisor).filter(|x| x * divisor == a_divident)?;
                 let b_divident = (ax * py) - (ay * px);
-                let b_presses = ((b_divident / divisor) * divisor == b_divident)
-                    .then(|| b_divident / divisor)?;
+                // Thanks to FichteFoll for the optimization trick here
+                let b_presses = Some(b_divident / divisor).filter(|x| x * divisor == b_divident)?;
                 Some((a_presses * 3) + b_presses)
             } else {
                 None
             }
-            //(0.lt(&divisor)).then(|| (*3) + ((ax * py) - (ay * px)) / divisor)
         })
         .sum()
 }
