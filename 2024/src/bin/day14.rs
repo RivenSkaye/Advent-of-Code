@@ -127,12 +127,12 @@ pub fn part_one(positions: &[Position]) -> isize {
 
 pub fn part_two(parsed: &[Position]) -> isize {
     let mut robots = parsed.to_vec();
-    for _ in 1..2500 {
+    for _ in 1..5000 {
         for idx in 0..robots.len() {
             robots[idx] = robots[idx].jump();
         }
     }
-    for step in 2500.. {
+    for step in 5000.. {
         for idx in 0..robots.len() {
             robots[idx] = robots[idx].jump();
         }
