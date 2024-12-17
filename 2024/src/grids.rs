@@ -27,6 +27,7 @@ impl FlatGrid {
         (position % self.line_length, position / self.line_length)
     }
 
+    #[inline]
     pub fn bounded_step(&self, current: usize, dir: Direction) -> Option<usize> {
         match (current, dir) {
             (n, Direction::UP) => (n >= self.line_length).then(|| n - self.line_length),
