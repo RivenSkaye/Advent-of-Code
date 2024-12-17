@@ -12,11 +12,14 @@ pub struct FlatGrid {
     line_length: usize,
 }
 
-impl<T> From<&[u8]> for FlatGrid {
+impl From<&[u8]> for FlatGrid {
     fn from(value: &[u8]) -> Self {
         Self {
             line_length: value.iter().position(|c| b'\n'.eq(c)).unwrap(),
-            inner: value.iter().filter(|chr| b'\n'.ne(chr)).collect(),
+            inner: value
+                .iter()
+                .filter_map(|chr| b'\n'.ne(chr).then_some(*chr))
+                .collect(),
         }
     }
 }
@@ -24,7 +27,7 @@ impl<T> From<&[u8]> for FlatGrid {
 impl FlatGrid {
     #[inline(always)]
     pub fn position(&self, idx: usize) -> (usize, usize) {
-        (position % self.line_length, position / self.line_length)
+        (idx % self.line_length, idx / self.line_length)
     }
 
     #[inline]
