@@ -1,3 +1,5 @@
+pub use std::ops::Deref;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 #[repr(u8)]
 pub enum Direction {
@@ -7,13 +9,14 @@ pub enum Direction {
     LEFT,
 }
 
+#[derive(Clone)]
 pub struct FlatGrid {
-    inner: Vec<u8>,
-    line_length: usize,
+    pub inner: Vec<u8>,
+    pub line_length: usize,
 }
 
-impl From<&[u8]> for FlatGrid {
-    fn from(value: &[u8]) -> Self {
+impl<T: Deref<Target = [u8]>> From<T> for FlatGrid {
+    fn from(value: T) -> Self {
         Self {
             line_length: value.iter().position(|c| b'\n'.eq(c)).unwrap(),
             inner: value
