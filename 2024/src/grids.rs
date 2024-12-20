@@ -46,6 +46,16 @@ impl FlatGrid {
     }
 
     #[inline]
+    pub fn unbounded_step(&self, current: usize, dir: Direction) -> usize {
+        match dir {
+            Direction::UP => current - self.line_length,
+            Direction::DOWN => current + self.line_length,
+            Direction::LEFT => current - 1,
+            Direction::RIGHT => current + 1,
+        }
+    }
+
+    #[inline]
     pub fn pacman_step(&self, current: usize, dir: Direction) -> usize {
         match (current, dir) {
             (n, Direction::UP) => {
