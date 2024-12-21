@@ -1,6 +1,6 @@
 pub use std::ops::Deref;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 #[repr(u8)]
 pub enum Direction {
     UP = 0b0001,
