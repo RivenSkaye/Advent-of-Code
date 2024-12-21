@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use std::{collections::HashMap, usize};
+use std::collections::HashMap;
 
 use aoc2024::{
     common,
