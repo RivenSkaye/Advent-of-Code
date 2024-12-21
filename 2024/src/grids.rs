@@ -9,6 +9,38 @@ pub enum Direction {
     LEFT,
 }
 
+impl Direction {
+    #[inline]
+    pub fn turn_clock(&self) -> Self {
+        match self {
+            Direction::UP => Direction::RIGHT,
+            Direction::RIGHT => Direction::DOWN,
+            Direction::DOWN => Direction::LEFT,
+            Direction::LEFT => Direction::UP,
+        }
+    }
+
+    #[inline]
+    pub fn turn_counter(&self) -> Self {
+        match self {
+            Direction::UP => Direction::LEFT,
+            Direction::RIGHT => Direction::UP,
+            Direction::DOWN => Direction::RIGHT,
+            Direction::LEFT => Direction::DOWN,
+        }
+    }
+
+    #[inline]
+    pub fn reverse(&self) -> Self {
+        match self {
+            Direction::UP => Direction::DOWN,
+            Direction::RIGHT => Direction::LEFT,
+            Direction::DOWN => Direction::UP,
+            Direction::LEFT => Direction::RIGHT,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct FlatGrid {
     pub inner: Vec<u8>,
