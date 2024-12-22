@@ -120,4 +120,15 @@ impl FlatGrid {
             }
         }
     }
+
+    #[allow(dead_code)]
+    pub fn print(&self) {
+        for i in 0..self.inner.len() {
+            print!("{}", String::from_utf8_lossy(&self.inner[i..=i]));
+            if (i + 1) % self.line_length == 0 {
+                println!("");
+            }
+        }
+        println!("");
+    }
 }
