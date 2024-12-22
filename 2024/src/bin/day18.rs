@@ -1,7 +1,7 @@
 #![feature(slice_split_once, test)]
 extern crate test;
 
-use pathfinding::prelude::dijkstra;
+use pathfinding::prelude::dijkstra as solution;
 
 use aoc2024::common;
 
@@ -77,7 +77,7 @@ pub fn parse(data: &[u8]) -> Vec<Position> {
 }
 
 pub fn part_one(corrupted: &[Position]) -> usize {
-    dijkstra(
+    solution(
         &Position { x: 0, y: 0 },
         |p| {
             p.successors()
@@ -94,7 +94,7 @@ pub fn part_one(corrupted: &[Position]) -> usize {
 pub fn part_two(corrupted: &[Position]) -> String {
     // shortcut: p1 taught us a route is guaranteed until TTL
     for next in TTL.. {
-        if dijkstra(
+        if solution(
             &Position { x: 0, y: 0 },
             |p| {
                 p.successors()
