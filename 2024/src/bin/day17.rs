@@ -1,7 +1,7 @@
 #![feature(iter_intersperse, test)]
 extern crate test;
 
-use std::ops::AddAssign;
+use std::{collections::VecDeque, ops::AddAssign};
 
 use aoc2024::common;
 
@@ -84,7 +84,6 @@ pub fn part_one(mut registers: [usize; 3], program: &[usize]) -> Vec<usize> {
 }
 
 pub fn part_two(program: &[usize]) -> usize {
-    let mut tries = Vec::with_capacity(6400);
     // I started noticing a pattern between lengths and bits at 2AM, namely that
     // the bit patterns produce one extra output number for every multiple of 3.
     // 0 - 3: 1 output
@@ -96,18 +95,36 @@ pub fn part_two(program: &[usize]) -> usize {
     // From this point onward, we produce the exact amount of output values in
     // the program as our input.
     // It's still slow, and I have no idea how to optimize it, but it works!
-    tries.push(((1 << ((program.len() - 1) * 3)) >> 1) * 2);
-    while let Some(next) = tries.pop() {
-        for tail in (0..8).map(|a| next + a) {
-            let cmp = part_one([tail, 0, 0], program);
+    // let start = ((1 << ((program.len() - 1) * 3)) >> 1) * 2;
+    // Never mind, the whole approach was wrong. It reaches a point where
+    // certain bit patterns will cause it to grow longer and then shorter again.
+    // I could've known this, had I checked a more substantial sample size for
+    // the test inputs value space. It apparently takes a couple hundred thousand
+    // with a lot of collisions on the same sequence!
+    // Instead, since all we care about is every segment of 3 bits, we check the
+    // pattern producing a specific output for every position and "store" that
+    // by keeping that position 3 bits higher.
+    // Fun fact! The output is generated based on the reverse 3-bit segments in
+    // the input. So if e.g. the last output is 0, and 5 produces only 0, then
+    // the binary representation must START with 0b101.
+
+    let mut tries = VecDeque::with_capacity(6400);
+    tries.push_back((0, program.len() - 1));
+    while let Some((next, len)) = tries.pop_front() {
+        for tail in (0..8).map(|a| (next << 3) | a) {
+            // let cmp = part_one([tail, 0, 0], program);
+            //println!("{tail} => {:?}", part_one([tail, 0, 0], program));
             // println!("Chasing {tail} => {cmp:?}");
-            if cmp == program {
-                return tail;
-            } else if !tries.contains(&tail) {
-                tries.push(tail);
+            // Check partial program output
+            if part_one([tail, 0, 0], program) == program[len..] {
+                // unless this partial happens to be the whole program
+                if len == 0 {
+                    return tail;
+                }
+                // We found a match, push the next position in
+                tries.push_back((tail, len - 1));
             }
         }
-        // panic!("Check the output counts for the last 8 tails")
     }
     unreachable!()
 }
