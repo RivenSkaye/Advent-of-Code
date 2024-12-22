@@ -6,4 +6,5 @@
 [dependencies]
     # No default features because we don't need mimalloc to add overhead
     # guaranteeing the same memory safety that Rust enforces by design.
-    mimalloc = { version = "^0.1", default-features = false }
+    mimalloc    = { version = "^0.1", default-features = false }
+    pathfinding = "4.12"
