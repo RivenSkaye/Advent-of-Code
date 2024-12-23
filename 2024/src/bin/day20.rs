@@ -1,4 +1,4 @@
-#![feature(let_chains, test)]
+#![feature(test)]
 extern crate test;
 
 use aoc2024::{
@@ -128,28 +128,7 @@ fn long_cheat(
     dirs.into_iter().for_each(|&dir| {
         if let Some(next) = grid.bounded_step(start, dir) {
             if grid.inner[next] != b'#' {
-                let next_ac = if let Some(ac) = active_cheat
-                    && ac.0 == ac.1
-                {
-                    if let Some(prev) = paths.get(&(ac.0, next)) {
-                        let mut counter = Vec::with_capacity(grid.inner.len());
-                        step_cheat(
-                            grid,
-                            next,
-                            end,
-                            steps + 1,
-                            to_beat,
-                            &[dir, dir.turn_clock(), dir.turn_counter()],
-                            true,
-                            &mut counter,
-                        );
-                        if let Some(&win) = counter.first()
-                            && win.lt(prev)
-                        {
-                            paths.insert((ac.0, next), win);
-                        }
-                        return;
-                    }
+                let next_ac = if let Some(ac) = active_cheat {
                     Some((ac.0, next))
                 } else {
                     active_cheat
@@ -162,7 +141,7 @@ fn long_cheat(
                     to_beat,
                     &[dir, dir.turn_clock(), dir.turn_counter()],
                     next_ac,
-                    if active_cheat.is_some() { 0 } else { 20 },
+                    cheat_steps - 1,
                     paths,
                 );
             } else if cheat_steps > 0 {
